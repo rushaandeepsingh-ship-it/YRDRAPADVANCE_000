@@ -1,0 +1,6 @@
+@EndUserText.label: 'ZYRDR_ITEM000'
+@MappingRole: true
+define role ZYRDR_ITEM000 {
+  grant select on ZYRDR_ITEM000
+  where TRUE;
+}

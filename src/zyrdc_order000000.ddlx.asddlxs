@@ -1,0 +1,162 @@
+@Metadata.layer: #CORE
+@UI.headerInfo.title.type: #STANDARD
+@UI.headerInfo.title.value: 'OrderID'
+@UI.headerInfo.description.type: #STANDARD
+@UI.headerInfo.description.value: 'OrderID'
+annotate view ZYRDC_ORDER000000 with
+{
+  @EndUserText.label: 'UUID'
+  @UI.identification: [ {
+    position: 10 , 
+    label: 'UUID'
+  } ]
+  @UI.lineItem: [ {
+    position: 10 , 
+    label: 'UUID'
+  } ]
+  @UI.selectionField: [ {
+    position: 10 
+  } ]
+  @UI.hidden: true
+  UUID;
+  
+  @EndUserText.label: 'OrderID'
+  @UI.facet: [ {
+    label: 'General Information', 
+    id: 'GeneralInfo', 
+    purpose: #STANDARD, 
+    position: 20 , 
+    type: #IDENTIFICATION_REFERENCE
+  }, 
+  {
+    label: 'Item Items', 
+    id: 'ItemItems', 
+    purpose: #STANDARD, 
+    position: 21 , 
+    type: #LINEITEM_REFERENCE, 
+    targetElement: '_Item'
+  } ]
+  @UI.identification: [ {
+    position: 20 , 
+    label: 'OrderID'
+  } ]
+  @UI.lineItem: [ {
+    position: 20 , 
+    label: 'OrderID'
+  } ]
+  @UI.selectionField: [ {
+    position: 20 
+  } ]
+  OrderID;
+  
+  @EndUserText.label: 'CustomerID'
+  @UI.identification: [ {
+    position: 30 , 
+    label: 'CustomerID'
+  } ]
+  @UI.lineItem: [ {
+    position: 30 , 
+    label: 'CustomerID'
+  } ]
+  @UI.selectionField: [ {
+    position: 30 
+  } ]
+  CustomerID;
+  
+  @EndUserText.label: 'OrderDate'
+  @UI.identification: [ {
+    position: 40 , 
+    label: 'OrderDate'
+  } ]
+  @UI.lineItem: [ {
+    position: 40 , 
+    label: 'OrderDate'
+  } ]
+  @UI.selectionField: [ {
+    position: 40 
+  } ]
+  OrderDate;
+  
+  @EndUserText.label: 'Status'
+  @UI.identification: [ {
+    position: 50 , 
+    label: 'Status'
+  } ]
+  @UI.lineItem: [ {
+    position: 50 , 
+    label: 'Status'
+  } ]
+  @UI.selectionField: [ {
+    position: 50 
+  } ]
+  Status;
+  
+  @EndUserText.label: 'NetAmount'
+  @UI.identification: [ {
+    position: 60 , 
+    label: 'NetAmount'
+  } ]
+  @UI.lineItem: [ {
+    position: 60 , 
+    label: 'NetAmount'
+  } ]
+  @UI.selectionField: [ {
+    position: 60 
+  } ]
+  NetAmount;
+  
+  @UI.identification: [ {
+    position: 90 
+  } ]
+  @UI.lineItem: [ {
+    position: 90 
+  } ]
+  @UI.selectionField: [ {
+    position: 90 
+  } ]
+  LocalCreatedBy;
+  
+  @UI.identification: [ {
+    position: 100 
+  } ]
+  @UI.lineItem: [ {
+    position: 100 
+  } ]
+  @UI.selectionField: [ {
+    position: 100 
+  } ]
+  LocalCreatedAt;
+  
+  @UI.identification: [ {
+    position: 110 
+  } ]
+  @UI.lineItem: [ {
+    position: 110 
+  } ]
+  @UI.selectionField: [ {
+    position: 110 
+  } ]
+  LocalLastChangedBy;
+  
+  @UI.identification: [ {
+    position: 120 
+  } ]
+  @UI.lineItem: [ {
+    position: 120 
+  } ]
+  @UI.selectionField: [ {
+    position: 120 
+  } ]
+  LocalLastChangedAt;
+  
+  @UI.identification: [ {
+    position: 130 
+  } ]
+  @UI.lineItem: [ {
+    position: 130 
+  } ]
+  @UI.selectionField: [ {
+    position: 130 
+  } ]
+  LastChangedAt;
+}

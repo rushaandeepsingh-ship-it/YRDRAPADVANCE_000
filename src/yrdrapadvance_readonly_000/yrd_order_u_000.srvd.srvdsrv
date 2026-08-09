@@ -1,0 +1,5 @@
+@EndUserText.label: 'Service Definition Order for read-only'
+define service YRD_Order_U_000 {
+  expose YRDC_Order_000;
+  expose YRDC_OrderItem_000;
+}

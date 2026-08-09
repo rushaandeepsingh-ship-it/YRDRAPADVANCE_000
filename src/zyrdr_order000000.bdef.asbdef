@@ -1,0 +1,89 @@
+managed implementation in class ZYRDBP_R_ORDER000000 unique;
+strict ( 2 );
+with draft;
+extensible;
+define behavior for ZYRDR_ORDER000000 alias Order000
+persistent table ZYRDORDER000
+extensible
+draft table ZYRDORDER_D000
+etag master LocalLastChangedAt
+lock master total etag LastChangedAt
+authorization master( global )
+{
+  field ( readonly )
+   UUID,
+   LocalCreatedBy,
+   LocalCreatedAt,
+   LocalLastChangedBy,
+   LocalLastChangedAt,
+   LastChangedAt;
+
+  field ( numbering : managed )
+   UUID;
+
+
+  create;
+  update;
+  delete;
+
+  draft action Activate optimized;
+  draft action Discard;
+  draft action Edit;
+  draft action Resume;
+  draft determine action Prepare;
+
+  mapping for ZYRDORDER000 corresponding extensible
+  {
+    UUID = UUID;
+    OrderID = ORDER_ID;
+    CustomerID = CUSTOMER_ID;
+    OrderDate = ORDER_DATE;
+    Status = STATUS;
+    CurrencyCode = CURRENCY_CODE;
+    NetAmount = NET_AMOUNT;
+    LocalCreatedBy = LOCAL_CREATED_BY;
+    LocalCreatedAt = LOCAL_CREATED_AT;
+    LocalLastChangedBy = LOCAL_LAST_CHANGED_BY;
+    LocalLastChangedAt = LOCAL_LAST_CHANGED_AT;
+    LastChangedAt = LAST_CHANGED_AT;
+  }
+
+  association _Item { create; with draft; }
+
+}
+
+define behavior for ZYRDR_ITEM000 alias Item
+persistent table ZYRDITEM000
+extensible
+draft table ZYRDITEM_D000
+etag dependent by _Order000
+lock dependent by _Order000
+authorization dependent by _Order000
+{
+  field ( readonly )
+   UUID,
+   ParentUUID;
+
+  field ( numbering : managed )
+   UUID;
+
+
+  update;
+  delete;
+
+  mapping for ZYRDITEM000 corresponding extensible
+  {
+    UUID = UUID;
+    ParentUUID = PARENT_UUID;
+    ItemID = ITEM_ID;
+    ProductID = PRODUCT_ID;
+    UOM = UOM;
+    ReqQuantity = REQ_QUANTITY;
+    CurrencyCode = CURRENCY_CODE;
+    Amount = AMOUNT;
+    Status = STATUS;
+  }
+
+  association _Order000 { with draft; }
+
+}

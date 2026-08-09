@@ -1,0 +1,11 @@
+{
+  "formatVersion": "1",
+  "header": {
+    "description": "SAP Object Node Type ZYRDORDER000",
+    "originalLanguage": "en",
+    "abapLanguageVersion": "cloudDevelopment"
+  },
+  "name": "ZYRDOrder000",
+  "sapObjectType": "ZYRDOrder000",
+  "rootNode": true
+}

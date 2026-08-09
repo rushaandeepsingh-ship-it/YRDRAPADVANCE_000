@@ -1,0 +1,70 @@
+@Metadata.layer: #CORE
+
+@UI: { headerInfo: { typeName: 'Item',
+                     typeNamePlural: 'Items',
+                     title: { type: #STANDARD, value: 'ProductID' }},
+       presentationVariant: [{ visualizations: [{type: #AS_LINEITEM}]
+//                               sortOrder: [{ by: 'ProductID', direction: #ASC }]
+                             }]
+
+      }
+
+
+annotate entity YRDC_OrderItem_000 with
+{
+
+  @UI.facet: [
+        {
+          id:              'Item',
+          purpose:         #STANDARD,
+          type:            #COLLECTION,
+          label:           'Item',
+          position:        10
+        },
+        {
+          id:              'General',
+          targetQualifier: 'General_FG',
+          parentId:        'Item',
+          purpose:         #STANDARD,
+          type:            #FIELDGROUP_REFERENCE,
+          label:           'General',
+          position:        10
+        },
+        {
+          id:              'Admin',
+          targetQualifier: 'Admin_FG',
+          parentId:        'Item',
+          purpose:         #STANDARD,
+          type:            #FIELDGROUP_REFERENCE,
+          label:           'Administrative Data',
+          position:        20
+        }
+      ]
+
+  @UI.hidden: true
+  UUID;
+  @UI.hidden: true
+  ParentUUID;
+  @UI: { lineItem:          [{ position: 10 }],
+         fieldGroup:        [{ position: 10, qualifier: 'General_FG' }]}
+  @EndUserText.quickInfo: 'Item ID'
+  ItemID;
+  @UI: { lineItem:          [{ position: 20 }],
+         fieldGroup:        [{ position: 20, qualifier: 'General_FG' }]}
+  @EndUserText.quickInfo: 'Product ID'
+  ProductID;
+  @UI: { lineItem:          [{ position: 30 }],
+         fieldGroup:        [{ position: 30, qualifier: 'General_FG' }]}
+  @EndUserText.quickInfo: 'Required Quantity'
+  ReqQuantity;
+  @UI: { lineItem:          [{ position: 40 }],
+         fieldGroup:        [{ position: 40, qualifier: 'General_FG' }]}
+  @EndUserText.quickInfo: 'Amount'
+  Amount;
+  @UI: { lineItem:          [{ position: 50 }],
+         fieldGroup:        [{ position: 50, qualifier: 'General_FG' }]}
+  @EndUserText.quickInfo: 'Status'
+  @UI.textArrangement: #TEXT_FIRST
+
+  Status;
+}

@@ -1,0 +1,112 @@
+@Metadata.layer: #CORE
+@UI.headerInfo.title.type: #STANDARD
+@UI.headerInfo.title.value: 'ItemID'
+@UI.headerInfo.description.type: #STANDARD
+@UI.headerInfo.description.value: 'ItemID'
+annotate view ZYRDC_ITEM000 with
+{
+  @EndUserText.label: 'UUID'
+  @UI.identification: [ {
+    position: 10 , 
+    label: 'UUID'
+  } ]
+  @UI.lineItem: [ {
+    position: 10 , 
+    label: 'UUID'
+  } ]
+  @UI.selectionField: [ {
+    position: 10 
+  } ]
+  UUID;
+  
+  @EndUserText.label: 'ParentUUID'
+  @UI.facet: [ {
+    label: 'General Information', 
+    id: 'GeneralInfo', 
+    purpose: #STANDARD, 
+    position: 20 , 
+    type: #IDENTIFICATION_REFERENCE
+  } ]
+  @UI.identification: [ {
+    position: 20 , 
+    label: 'ParentUUID'
+  } ]
+  @UI.lineItem: [ {
+    position: 20 , 
+    label: 'ParentUUID'
+  } ]
+  @UI.selectionField: [ {
+    position: 20 
+  } ]
+  ParentUUID;
+  
+  @EndUserText.label: 'ItemID'
+  @UI.identification: [ {
+    position: 30 , 
+    label: 'ItemID'
+  } ]
+  @UI.lineItem: [ {
+    position: 30 , 
+    label: 'ItemID'
+  } ]
+  @UI.selectionField: [ {
+    position: 30 
+  } ]
+  ItemID;
+  
+  @EndUserText.label: 'ProductID'
+  @UI.identification: [ {
+    position: 40 , 
+    label: 'ProductID'
+  } ]
+  @UI.lineItem: [ {
+    position: 40 , 
+    label: 'ProductID'
+  } ]
+  @UI.selectionField: [ {
+    position: 40 
+  } ]
+  ProductID;
+  
+  @EndUserText.label: 'ReqQuantity'
+  @UI.identification: [ {
+    position: 50 , 
+    label: 'ReqQuantity'
+  } ]
+  @UI.lineItem: [ {
+    position: 50 , 
+    label: 'ReqQuantity'
+  } ]
+  @UI.selectionField: [ {
+    position: 50 
+  } ]
+  ReqQuantity;
+  
+  @EndUserText.label: 'Amount'
+  @UI.identification: [ {
+    position: 60 , 
+    label: 'Amount'
+  } ]
+  @UI.lineItem: [ {
+    position: 60 , 
+    label: 'Amount'
+  } ]
+  @UI.selectionField: [ {
+    position: 60 
+  } ]
+  Amount;
+  
+  @EndUserText.label: 'Status'
+  @UI.identification: [ {
+    position: 70 , 
+    label: 'Status'
+  } ]
+  @UI.lineItem: [ {
+    position: 70 , 
+    label: 'Status'
+  } ]
+  @UI.selectionField: [ {
+    position: 70 
+  } ]
+  Status;
+}

@@ -1,0 +1,5 @@
+@EndUserText.label: 'Service Definition'
+define service ZYRDUI_ORDER_000_O4 {
+  expose ZYRDC_ORDER000000 as Order000;
+  expose ZYRDC_ITEM000     as Item000;
+}
