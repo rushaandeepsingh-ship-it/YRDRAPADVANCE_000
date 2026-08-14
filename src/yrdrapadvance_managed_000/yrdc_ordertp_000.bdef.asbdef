@@ -1,0 +1,19 @@
+projection;
+strict ( 2 );
+
+define behavior for YRDC_ORDERTP_000 //alias <alias_name>
+{
+  use create;
+  use update;
+  use delete;
+
+  use association _Item { create; }
+}
+
+define behavior for YRDC_ORDERITEMTP_000 //alias <alias_name>
+{
+  use update;
+  use delete;
+
+  use association _Order;
+}

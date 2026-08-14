@@ -1,0 +1,74 @@
+managed implementation in class yrdbp_r_ordertp_000 unique;
+strict ( 2 );
+
+define behavior for YRDR_OrderTP_000 //alias <alias_name>
+persistent table zyrdorder000
+lock master
+authorization master ( instance )
+etag master LocalLastChangedAt
+{
+  create ( authorization : global );
+  update;
+  delete;
+
+  field ( readonly )
+  UUID,
+  LocalCreatedBy,
+  LocalCreatedAt,
+  LocalLastChangedBy,
+  LocalLastChangedAt,
+  LastChangedAt;
+
+  field ( numbering : managed ) Uuid;
+
+  association _Item { create;  }
+
+  // Mapping of DB fields with Entity fields
+  mapping for zyrdorder000 corresponding
+    {
+      Uuid               = uuid;
+      OrderId            = order_id;
+      Status             = status;
+      CustomerId         = customer_id;
+      CurrencyCode       = currency_code;
+      OrderDate          = order_date;
+      NetAmount          = net_amount;
+      LastChangedAt      = last_changed_at;
+      LocalCreatedAt     = local_created_at;
+      LocalCreatedBy     = local_created_by;
+      LocalLastChangedAt = local_last_changed_at;
+      LocalLastChangedBy = local_last_changed_by;
+    }
+}
+
+define behavior for YRDR_OrderItemTP_000 //alias <alias_name>
+persistent table zyrditem000
+lock dependent by _Order
+authorization dependent by _Order
+etag dependent by _Order
+{
+  update;
+  delete;
+
+  field ( readonly )
+   UUID,
+   ParentUUID;
+
+  field ( numbering : managed )
+   UUID;
+
+  association _Order;
+
+  mapping for zyrditem000 corresponding
+    {
+      Amount       = amount;
+      CurrencyCode = currency_code;
+      ItemId       = item_id;
+      ParentUuid   = parent_uuid;
+      ProductId    = product_id;
+      ReqQuantity  = req_quantity;
+      Status       = status;
+      Uom          = uom;
+      Uuid         = uuid;
+    }
+}

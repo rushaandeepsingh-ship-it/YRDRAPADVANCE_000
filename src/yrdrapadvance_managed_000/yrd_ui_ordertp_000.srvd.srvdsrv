@@ -1,0 +1,5 @@
+@EndUserText.label: 'Service Definition Order transactional'
+define service YRD_UI_ORDERTP_000 {
+  expose YRDC_ORDERTP_000     as Orders;
+  expose YRDC_ORDERITEMTP_000 as Item;
+}

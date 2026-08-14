@@ -1,0 +1,5 @@
+@EndUserText.label: 'Service Definition Order for read-only purpose'
+define service YRD_UI_ORDERTP_READONLY_000 {
+  expose YRDC_ORDERTP_READ_000     as OrderReadOnly;
+  expose YRDC_ORDERITEMTP_READ_000 as ItemReadOnly;
+}

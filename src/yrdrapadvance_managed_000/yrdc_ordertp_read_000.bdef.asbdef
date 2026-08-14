@@ -1,0 +1,14 @@
+projection;
+strict ( 2 );
+
+define behavior for YRDC_ORDERTP_READ_000 //alias <alias_name>
+{
+
+  use association _Item {  }
+}
+
+define behavior for YRDC_ORDERITEMTP_READ_000 //alias <alias_name>
+{
+
+  use association _Order;
+}
