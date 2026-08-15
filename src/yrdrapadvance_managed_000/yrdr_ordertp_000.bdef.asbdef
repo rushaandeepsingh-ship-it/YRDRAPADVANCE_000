@@ -19,9 +19,21 @@ etag master LocalLastChangedAt
   LocalLastChangedAt,
   LastChangedAt;
 
+  // Managed numbering for GUID generation
   field ( numbering : managed ) Uuid;
+  // Dynamic Feature Control - Fields
+  field ( features : instance ) NetAmount, CurrencyCode;
+  // Static feature control - Fields
+  field ( mandatory:create, readonly : update ) CustomerId;
+  // Dynamic Feayure control - Operations
+  association _Item { create ( features : instance ); }
 
-  association _Item { create;  }
+
+  // Validations
+  validation check_order_date on save { field OrderDate; }
+
+  // Determination
+  determination fill_status on modify { field CustomerId; }
 
   // Mapping of DB fields with Entity fields
   mapping for zyrdorder000 corresponding
@@ -51,11 +63,13 @@ etag dependent by _Order
   delete;
 
   field ( readonly )
-   UUID,
-   ParentUUID;
+  UUID,
+  ParentUUID;
 
   field ( numbering : managed )
-   UUID;
+  UUID;
+
+  field ( mandatory : create ) ProductId;
 
   association _Order;
 
