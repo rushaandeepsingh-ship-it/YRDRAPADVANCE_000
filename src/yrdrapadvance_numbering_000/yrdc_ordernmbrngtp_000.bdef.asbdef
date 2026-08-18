@@ -1,0 +1,19 @@
+projection;
+strict ( 2 );
+
+define behavior for YRDC_OrderNmbrngTP_000 alias Order
+{
+  use create;
+  use update;
+  use delete;
+
+  use association _Item { create; }
+}
+
+define behavior for YRDC_ItemNmbrngTP_000 alias Item
+{
+  use update;
+  use delete;
+
+  use association _Order;
+}

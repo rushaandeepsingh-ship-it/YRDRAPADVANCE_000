@@ -1,0 +1,81 @@
+managed implementation in class yrdbp_r_ordernmbrngtp_000 unique;
+strict ( 2 );
+
+define behavior for YRDR_OrderNmbrngTP_000 alias Order
+persistent table zyrdorder_num000
+lock master
+authorization master ( instance )
+etag master LocalLastChangedAt
+early numbering
+{
+  create ( authorization : global );
+  update;
+  delete;
+
+  field ( readonly )
+  OrderId,
+  LocalCreatedBy,
+  LocalCreatedAt,
+  LocalLastChangedBy,
+  LocalLastChangedAt,
+  LastChangedAt;
+
+  // Dynamic Feature Control - Fields
+  field ( features : instance ) NetAmount, CurrencyCode;
+  // Static feature control - Fields
+  field ( mandatory : create, readonly : update ) CustomerId;
+
+  // Validations
+  validation check_order_date on save { field OrderDate; }
+
+  // Determination
+  determination fill_status on modify { field CustomerId; }
+
+  // Dynamic Feayure control - Operations
+  association _Item { create ( features : instance ); }
+
+  // Mapping of DB fields with Entity fields
+  mapping for zyrdorder_num000 corresponding
+    {
+      OrderId            = order_id;
+      Status             = status;
+      CustomerId         = customer_id;
+      CurrencyCode       = currency_code;
+      OrderDate          = order_date;
+      NetAmount          = net_amount;
+      LastChangedAt      = last_changed_at;
+      LocalCreatedAt     = local_created_at;
+      LocalCreatedBy     = local_created_by;
+      LocalLastChangedAt = local_last_changed_at;
+      LocalLastChangedBy = local_last_changed_by;
+    }
+}
+
+define behavior for YRDR_ItemNmbrngTP_000 alias Item
+persistent table zyrditem_num000
+lock dependent by _Order
+authorization dependent by _Order
+etag dependent by _Order
+early numbering
+{
+  update;
+  delete;
+
+  field ( readonly ) ItemId, OrderId;
+
+  field ( mandatory : create ) ProductId;
+
+  association _Order;
+
+  mapping for zyrditem_num000 corresponding
+    {
+      Amount       = amount;
+      CurrencyCode = currency_code;
+      ItemId       = item_id;
+      ProductId    = product_id;
+      ReqQuantity  = req_quantity;
+      Status       = status;
+      Uom          = uom;
+      OrderId      = order_id;
+    }
+}
