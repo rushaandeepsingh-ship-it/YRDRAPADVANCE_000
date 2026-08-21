@@ -4,6 +4,7 @@
 define root view entity YRDR_OrderNmbrngTP_000
   as select from zyrdorder_num000
   composition [0..*] of YRDR_ItemNmbrngTP_000 as _Item
+    association [0..1] to YRDI_OrderStatus_VH as _OrderStatusTxt on $projection.Status = _OrderStatusTxt.Status
 {
   key order_id              as OrderId,
       customer_id           as CustomerId,
@@ -17,5 +18,6 @@ define root view entity YRDR_OrderNmbrngTP_000
       local_last_changed_by as LocalLastChangedBy,
       local_last_changed_at as LocalLastChangedAt,
       last_changed_at       as LastChangedAt,
-      _Item // Make association public
+      _Item ,
+      _OrderStatusTxt  // Make association public
 }

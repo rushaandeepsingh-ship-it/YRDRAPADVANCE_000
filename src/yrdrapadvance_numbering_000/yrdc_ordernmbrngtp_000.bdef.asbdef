@@ -1,4 +1,4 @@
-projection;
+projection implementation in class yrdbp_c_ordernmbrngtp_000 unique;
 strict ( 2 );
 
 define behavior for YRDC_OrderNmbrngTP_000 alias Order
@@ -6,6 +6,12 @@ define behavior for YRDC_OrderNmbrngTP_000 alias Order
   use create;
   use update;
   use delete;
+
+  use action( precheck ) accept;
+  use action reject;
+  use action changeStatus;
+
+  use action copy;
 
   use association _Item { create; }
 }

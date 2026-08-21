@@ -31,6 +31,14 @@ early numbering
   // Determination
   determination fill_status on modify { field CustomerId; }
 
+  // instance action and dynamic action control
+  action ( features : instance ) accept result [1] $self;
+  action ( features : instance ) reject result [1] $self;
+
+  action (features : instance) changeStatus parameter YRD_D_OrderStatusP result [1] $self;
+
+  factory action ( features : instance ) copy deep parameter YRD_D_ORDERCOPYP [1];
+
   // Dynamic Feayure control - Operations
   association _Item { create ( features : instance ); }
 

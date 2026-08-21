@@ -22,6 +22,16 @@ CLASS lhc_Order DEFINITION INHERITING FROM cl_abap_behavior_handler.
     METHODS check_order_date FOR VALIDATE ON SAVE
        keys FOR Order~check_order_date.
 
+    METHODS accept FOR MODIFY
+       keys FOR ACTION Order~accept RESULT result.
+
+    METHODS reject FOR MODIFY
+       keys FOR ACTION Order~reject RESULT result.
+    METHODS copy FOR MODIFY
+       keys FOR ACTION Order~copy.
+    METHODS changeStatus FOR MODIFY
+      keys FOR ACTION Order~changeStatus RESULT result.
+
 ENDCLASS.
 
 CLASS lhc_Order IMPLEMENTATION.
@@ -46,8 +56,11 @@ CLASS lhc_Order IMPLEMENTATION.
                        %features-%field-CurrencyCode    =   COND #( WHEN ls_data-Status = '02' THEN if_abap_behv=>fc-f-read_only
                                                                                                ELSE if_abap_behv=>fc-f-unrestricted  )
                        %features-%assoc-_Item           =   COND #( WHEN ls_data-Status = '02' THEN if_abap_behv=>fc-o-disabled
-                                                                                               ELSE if_abap_behv=>fc-o-enabled  )
-                       )
+                                                                                               ELSE if_abap_behv=>fc-o-enabled )
+                       %features-%action-accept         =   COND #( WHEN ls_data-Status = '02' THEN if_abap_behv=>fc-o-enabled
+                                                                                               ELSE if_abap_behv=>fc-o-disabled )
+                       %features-%action-reject         =   COND #( WHEN ls_data-Status = '03' THEN if_abap_behv=>fc-o-enabled
+                                                                                               ELSE if_abap_behv=>fc-o-disabled ) )
                      ).
   ENDMETHOD.
 
@@ -143,20 +156,16 @@ CLASS lhc_Order IMPLEMENTATION.
     LOOP AT entities ASSIGNING FIELD-SYMBOL(<ls_order>) GROUP BY <ls_order>-OrderId.
 
       " Get highest booking_id from existing bookings belonging to travel
-      DATA(lv_max_item_id) = REDUCE #( INIT max = CONV yrdorderid( '0' )
-                                 FOR  ls_item IN lt_items USING KEY entity WHERE ( source-OrderId  = <ls_order>-OrderId )
-                                 NEXT max = COND yrdorderid( WHEN ls_item-target-ItemId > max
-                                                                    THEN ls_item-target-ItemId
-                                                                    ELSE max )
-                               ).
-      " Get highest assigned booking_id from incoming entities, eg from internal operations
-      lv_max_item_id = REDUCE #( INIT max = lv_max_item_id
-                                 FOR  entity IN entities USING KEY entity WHERE ( OrderId  = <ls_order>-OrderId )
-                                 FOR  target IN entity-%target
-                                 NEXT max = COND yrdorderid( WHEN   target-ItemId > max
-                                                                    THEN target-ItemId
-                                                                    ELSE max )
-                               ).
+      DATA: lv_max         TYPE yrdorderid,
+            lv_max_item_id TYPE yrdorderid.
+      LOOP AT lt_items INTO DATA(ls_item) WHERE source-OrderId = <ls_order>-OrderId.
+
+        IF shift_left( ls_item-target-ItemId ) > lv_max.
+          lv_max = shift_left( ls_item-target-ItemId ).
+        ENDIF.
+        lv_max_item_id = lv_max.
+      ENDLOOP.
+
 
       " Assign new booking-ids if not already assigned
       LOOP AT <ls_order>-%target ASSIGNING FIELD-SYMBOL(<item_wo_numbers>).
@@ -222,6 +231,130 @@ CLASS lhc_Order IMPLEMENTATION.
         ENDIF.
       ENDLOOP.
     ENDIF.
+  ENDMETHOD.
+
+  METHOD accept.
+
+    " Modify in local mode: BO-related updates that are not relevant for authorization checks
+    MODIFY ENTITIES OF YRDR_OrderNmbrngTP_000 IN LOCAL MODE
+           ENTITY Order
+              UPDATE FIELDS ( Status )
+                 WITH VALUE #( FOR key IN keys ( %tky    = key-%tky
+                                                 Status  = '03' ) ). " Approved
+
+    " Read changed data for action result
+    READ ENTITIES OF YRDR_OrderNmbrngTP_000 IN LOCAL MODE
+      ENTITY Order
+         ALL FIELDS WITH
+         CORRESPONDING #( keys )
+       RESULT DATA(lt_result).
+
+    result = VALUE #( FOR ls_result IN lt_result ( %tky   = ls_result-%tky
+                                                   %param = ls_result ) ).
+
+
+  ENDMETHOD.
+
+  METHOD reject.
+
+
+    " Modify in local mode: BO-related updates that are not relevant for authorization checks
+    MODIFY ENTITIES OF YRDR_OrderNmbrngTP_000 IN LOCAL MODE
+           ENTITY Order
+              UPDATE FIELDS ( Status )
+                 WITH VALUE #( FOR key IN keys ( %tky    = key-%tky
+                                                 Status  = '04' ) ). " Rejected
+
+    " Read changed data for action result
+    READ ENTITIES OF YRDR_OrderNmbrngTP_000 IN LOCAL MODE
+      ENTITY Order
+         ALL FIELDS WITH
+         CORRESPONDING #( keys )
+       RESULT DATA(lt_result).
+
+    result = VALUE #( FOR ls_result IN lt_result ( %tky   = ls_result-%tky
+                                                   %param = ls_result ) ).
+
+  ENDMETHOD.
+
+  METHOD copy.
+
+    DATA: lt_order_copy TYPE TABLE FOR CREATE YRDR_OrderNmbrngTP_000\\order,
+          lt_item_copy  TYPE TABLE FOR CREATE YRDR_OrderNmbrngTP_000\\Order\_Item.
+
+
+    READ ENTITIES OF YRDR_OrderNmbrngTP_000 IN LOCAL MODE
+      ENTITY Order
+         ALL FIELDS WITH
+         CORRESPONDING #( keys )
+       RESULT DATA(lt_order)
+       ENTITY Order BY \_Item
+       ALL FIELDS WITH
+       CORRESPONDING #( keys )
+       RESULT DATA(lt_items).
+
+    LOOP AT keys INTO DATA(key).
+      READ TABLE lt_order ASSIGNING FIELD-SYMBOL(<ls_order>) WITH KEY id COMPONENTS %tky = key-%tky.
+      IF sy-subrc EQ 0.
+        "Fill travel container for creating new travel instance
+        APPEND VALUE #( %cid  = key-%cid
+                        %data = CORRESPONDING #( <ls_order> EXCEPT orderid ) ) TO lt_order_copy ASSIGNING FIELD-SYMBOL(<ls_new_order>).
+        " Update Order Date to current system date
+        <ls_new_order>-OrderDate     = cl_abap_context_info=>get_system_date( ).
+        "Update Customer ID from Action input parameter
+        <ls_new_order>-CustomerId    = key-%param-CustomerId_param.
+
+        "Fill %cid_ref of Order as instance identifier for cba Item
+        APPEND VALUE #( %cid_ref = key-%cid ) TO lt_item_copy ASSIGNING FIELD-SYMBOL(<ls_item_cba>).
+
+        LOOP AT lt_items ASSIGNING FIELD-SYMBOL(<ls_item>).
+          "Fill Item container for creating Items with cba
+          APPEND VALUE #( %cid  = key-%cid && shift_left( <ls_item>-ItemId )
+                          %data = CORRESPONDING #( lt_items[ KEY entity %tky = <ls_item>-%tky ] EXCEPT orderid ) )
+            TO <ls_item_cba>-%target ASSIGNING FIELD-SYMBOL(<ls_new_item>).
+
+        ENDLOOP.
+      ELSE.
+        APPEND CORRESPONDING #( key MAPPING %fail = DEFAULT VALUE #( cause = if_abap_behv=>cause-not_found ) ) TO failed-order.
+      ENDIF.
+    ENDLOOP.
+
+
+    " Create new BO Instances
+    MODIFY ENTITIES OF YRDR_OrderNmbrngTP_000 IN LOCAL MODE
+    ENTITY Order
+    CREATE FIELDS ( CustomerID OrderDate Status CurrencyCode NetAmount )
+    WITH lt_order_copy
+    ENTITY Order
+    CREATE BY \_Item
+    FIELDS ( ItemId ProductId Uom ReqQuantity CurrencyCode Amount Status )
+    WITH lt_item_copy
+    MAPPED DATA(ls_mapped_create).
+
+    mapped-order = ls_mapped_create-order.
+
+  ENDMETHOD.
+
+  METHOD changeStatus.
+
+ " Modify in local mode: BO-related updates that are not relevant for authorization checks
+    MODIFY ENTITIES OF YRDR_OrderNmbrngTP_000 IN LOCAL MODE
+           ENTITY Order
+              UPDATE FIELDS ( Status )
+                 WITH VALUE #( FOR key IN keys ( %tky    = key-%tky
+                                                 Status  = key-%param-status_param ) ). " Approved
+
+    " Read changed data for action result
+    READ ENTITIES OF YRDR_OrderNmbrngTP_000 IN LOCAL MODE
+      ENTITY Order
+         ALL FIELDS WITH
+         CORRESPONDING #( keys )
+       RESULT DATA(lt_result).
+
+    result = VALUE #( FOR ls_result IN lt_result ( %tky   = ls_result-%tky
+                                                   %param = ls_result ) ).
+
+
   ENDMETHOD.
 
 ENDCLASS.

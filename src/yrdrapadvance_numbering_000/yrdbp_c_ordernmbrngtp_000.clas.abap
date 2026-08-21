@@ -1,0 +1,5 @@
+CLASS yrdbp_c_ordernmbrngtp_000 DEFINITION PUBLIC ABSTRACT FINAL FOR BEHAVIOR OF yrdc_ordernmbrngtp_000.
+ENDCLASS.
+
+CLASS yrdbp_c_ordernmbrngtp_000 IMPLEMENTATION.
+ENDCLASS.

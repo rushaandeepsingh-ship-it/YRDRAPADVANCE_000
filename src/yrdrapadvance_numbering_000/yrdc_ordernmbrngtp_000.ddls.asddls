@@ -10,6 +10,7 @@ define root view entity YRDC_OrderNmbrngTP_000
   key OrderId,
       CustomerId,
       OrderDate,
+      @ObjectModel.text.element: [ 'OrderStatusText' ]
       Status,
       CurrencyCode,
       @Semantics.amount.currencyCode: 'CurrencyCode'
@@ -19,6 +20,7 @@ define root view entity YRDC_OrderNmbrngTP_000
       LocalLastChangedBy,
       LocalLastChangedAt,
       LastChangedAt,
+      _OrderStatusTxt.StatusText as OrderStatusText,
       /* Associations */
       _Item : redirected to composition child YRDC_ItemNmbrngTP_000
 }
