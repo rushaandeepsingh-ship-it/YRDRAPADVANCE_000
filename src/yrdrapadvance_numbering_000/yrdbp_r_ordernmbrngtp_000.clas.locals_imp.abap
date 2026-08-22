@@ -30,7 +30,9 @@ CLASS lhc_Order DEFINITION INHERITING FROM cl_abap_behavior_handler.
     METHODS copy FOR MODIFY
        keys FOR ACTION Order~copy.
     METHODS changeStatus FOR MODIFY
-      keys FOR ACTION Order~changeStatus RESULT result.
+       keys FOR ACTION Order~changeStatus RESULT result.
+    METHODS GetDefaultsForCopy FOR READ
+       keys FOR FUNCTION Order~GetDefaultsForCopy RESULT result.
 
 ENDCLASS.
 
@@ -72,26 +74,37 @@ CLASS lhc_Order IMPLEMENTATION.
 
   METHOD earlynumbering_create.
 
+    " Ensure Travel ID is not set yet (idempotent)- must be checked when BO is draft-enabled
+    LOOP AT entities INTO DATA(ls_entity) WHERE OrderId IS NOT INITIAL.
+      APPEND CORRESPONDING #( ls_entity ) TO mapped-order.
+    ENDLOOP.
+
+    DATA(lt_entities_wo_orderid) = entities.
+    DELETE lt_entities_wo_orderid WHERE OrderId IS NOT INITIAL.
+
     " Get Numbers
     TRY.
         cl_numberrange_runtime=>number_get(
           EXPORTING
             nr_range_nr       = '01'
             object            = 'YRDRAP_ORD'
-            quantity          = CONV #( lines( entities ) )
+            quantity          = CONV #( lines( lt_entities_wo_orderid ) )
           IMPORTING
             number            = DATA(number_range_key)
             returncode        = DATA(number_range_return_code)
             returned_quantity = DATA(number_range_returned_quantity)
         ).
       CATCH cx_number_ranges INTO DATA(lx_number_ranges).
-        LOOP AT entities INTO DATA(entity).
+        LOOP AT lt_entities_wo_orderid INTO DATA(entity).
           APPEND VALUE #( %cid = entity-%cid
                           %key = entity-%key
+                          %Is_draft = entity-%is_draft
                           %msg = lx_number_ranges
                         ) TO reported-order.
+
           APPEND VALUE #( %cid = entity-%cid
                           %key = entity-%key
+                          %Is_draft = entity-%is_draft
                         ) TO failed-order.
         ENDLOOP.
         EXIT.
@@ -132,12 +145,13 @@ CLASS lhc_Order IMPLEMENTATION.
     DATA(lv_order_id_max) = CONV yrdorderid( number_range_key - number_range_returned_quantity ).
 
     " Set Order ID
-    LOOP AT entities INTO entity.
+    LOOP AT lt_entities_wo_orderid INTO entity.
       lv_order_id_max += 1.
-      entity-OrderId = lv_order_id_max .
+      entity-%key-OrderId = lv_order_id_max .
 
-      APPEND VALUE #( %cid = entity-%cid
-                      %key = entity-%key
+      APPEND VALUE #( %cid      = entity-%cid
+                      %is_draft = entity-%is_draft
+                      %key      = entity-%key
                     ) TO mapped-order.
     ENDLOOP.
 
@@ -155,7 +169,7 @@ CLASS lhc_Order IMPLEMENTATION.
     " Loop over all unique OrderIDs
     LOOP AT entities ASSIGNING FIELD-SYMBOL(<ls_order>) GROUP BY <ls_order>-OrderId.
 
-      " Get highest booking_id from existing bookings belonging to travel
+      " Get highest ItemID from existing Items belonging to Order
       DATA: lv_max         TYPE yrdorderid,
             lv_max_item_id TYPE yrdorderid.
       LOOP AT lt_items INTO DATA(ls_item) WHERE source-OrderId = <ls_order>-OrderId.
@@ -167,7 +181,7 @@ CLASS lhc_Order IMPLEMENTATION.
       ENDLOOP.
 
 
-      " Assign new booking-ids if not already assigned
+      " Assign new ItemIDs if not already assigned
       LOOP AT <ls_order>-%target ASSIGNING FIELD-SYMBOL(<item_wo_numbers>).
         APPEND CORRESPONDING #( <item_wo_numbers> ) TO mapped-item ASSIGNING FIELD-SYMBOL(<mapped_item>).
         IF <item_wo_numbers>-ItemId IS INITIAL.
@@ -208,7 +222,7 @@ CLASS lhc_Order IMPLEMENTATION.
     " 1. READ the order instance based on keys
     READ ENTITIES OF YRDR_OrderNmbrngTP_000 IN LOCAL MODE
   ENTITY Order
-  FIELDS ( Status )
+  FIELDS ( OrderDate )
   WITH CORRESPONDING #( keys )
   RESULT DATA(lt_result)
   FAILED DATA(lt_failed).
@@ -224,8 +238,8 @@ CLASS lhc_Order IMPLEMENTATION.
           APPEND VALUE #( %tky                = <ls_data>-%tky
                           %state_area         = 'VALIDATE_DATE'
                           %msg                = new_message_with_text(
-                          severity  = if_abap_behv_message=>severity-error
-                          text      = |Order Date can not be in past| )
+                                  severity  = if_abap_behv_message=>severity-error
+                                  text      = |Order Date can not be in past| )
                           %element-OrderDate = if_abap_behv=>mk-on
                         ) TO reported-order.
         ENDIF.
@@ -297,23 +311,30 @@ CLASS lhc_Order IMPLEMENTATION.
       READ TABLE lt_order ASSIGNING FIELD-SYMBOL(<ls_order>) WITH KEY id COMPONENTS %tky = key-%tky.
       IF sy-subrc EQ 0.
         "Fill travel container for creating new travel instance
-        APPEND VALUE #( %cid  = key-%cid
-                        %data = CORRESPONDING #( <ls_order> EXCEPT orderid ) ) TO lt_order_copy ASSIGNING FIELD-SYMBOL(<ls_new_order>).
+        APPEND VALUE #( %cid        = key-%cid
+                        %is_draft   = key-%param-%is_draft
+                        %data       = CORRESPONDING #( <ls_order> EXCEPT orderid ) ) TO lt_order_copy ASSIGNING FIELD-SYMBOL(<ls_new_order>).
         " Update Order Date to current system date
-        <ls_new_order>-OrderDate     = cl_abap_context_info=>get_system_date( ).
+        <ls_new_order>-OrderDate     = key-%param-order_date_param.
         "Update Customer ID from Action input parameter
         <ls_new_order>-CustomerId    = key-%param-CustomerId_param.
 
-        "Fill %cid_ref of Order as instance identifier for cba Item
-        APPEND VALUE #( %cid_ref = key-%cid ) TO lt_item_copy ASSIGNING FIELD-SYMBOL(<ls_item_cba>).
+        DATA(lv_isitemtocopy) = key-%param-IsItemToCopy.
 
-        LOOP AT lt_items ASSIGNING FIELD-SYMBOL(<ls_item>).
-          "Fill Item container for creating Items with cba
-          APPEND VALUE #( %cid  = key-%cid && shift_left( <ls_item>-ItemId )
-                          %data = CORRESPONDING #( lt_items[ KEY entity %tky = <ls_item>-%tky ] EXCEPT orderid ) )
-            TO <ls_item_cba>-%target ASSIGNING FIELD-SYMBOL(<ls_new_item>).
+        IF lv_isitemtocopy IS NOT INITIAL.
+          "Fill %cid_ref of Order as instance identifier for cba Item
+          APPEND VALUE #( %cid_ref  = key-%cid
+                          %is_draft = key-%param-%is_draft ) TO lt_item_copy ASSIGNING FIELD-SYMBOL(<ls_item_cba>).
 
-        ENDLOOP.
+          LOOP AT lt_items ASSIGNING FIELD-SYMBOL(<ls_item>).
+            "Fill Item container for creating Items with cba
+            APPEND VALUE #( %cid      = key-%cid && shift_left( <ls_item>-ItemId )
+                            %is_draft = key-%param-%is_draft
+                            %data     = CORRESPONDING #( lt_items[ KEY entity %tky = <ls_item>-%tky ] EXCEPT orderid ) )
+              TO <ls_item_cba>-%target ASSIGNING FIELD-SYMBOL(<ls_new_item>).
+
+          ENDLOOP.
+        ENDIF.
       ELSE.
         APPEND CORRESPONDING #( key MAPPING %fail = DEFAULT VALUE #( cause = if_abap_behv=>cause-not_found ) ) TO failed-order.
       ENDIF.
@@ -337,7 +358,7 @@ CLASS lhc_Order IMPLEMENTATION.
 
   METHOD changeStatus.
 
- " Modify in local mode: BO-related updates that are not relevant for authorization checks
+    " Modify in local mode: BO-related updates that are not relevant for authorization checks
     MODIFY ENTITIES OF YRDR_OrderNmbrngTP_000 IN LOCAL MODE
            ENTITY Order
               UPDATE FIELDS ( Status )
@@ -354,6 +375,18 @@ CLASS lhc_Order IMPLEMENTATION.
     result = VALUE #( FOR ls_result IN lt_result ( %tky   = ls_result-%tky
                                                    %param = ls_result ) ).
 
+
+  ENDMETHOD.
+
+  METHOD GetDefaultsForCopy.
+
+    LOOP AT keys ASSIGNING FIELD-SYMBOL(<ls_key>).
+
+      INSERT INITIAL LINE INTO TABLE result ASSIGNING FIELD-SYMBOL(<ls_result>).
+      <ls_result> = CORRESPONDING #( <ls_key> ).
+      <ls_result>-%param = VALUE #( IsItemToCopy      =   abap_true
+                                    order_date_param  =   cl_abap_context_info=>get_system_date( ) ).
+    ENDLOOP.
 
   ENDMETHOD.
 

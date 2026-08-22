@@ -1,9 +1,12 @@
 managed implementation in class yrdbp_r_ordernmbrngtp_000 unique;
 strict ( 2 );
+with draft;
 
 define behavior for YRDR_OrderNmbrngTP_000 alias Order
 persistent table zyrdorder_num000
+draft table zyrdorder_d_000
 lock master
+total etag LastChangedAt
 authorization master ( instance )
 etag master LocalLastChangedAt
 early numbering
@@ -11,6 +14,15 @@ early numbering
   create ( authorization : global );
   update;
   delete;
+
+  draft action Activate optimized;
+  draft action Discard;
+  draft action Edit;
+  draft action Resume;
+  draft determine action Prepare
+  {
+    validation check_order_date;
+  }
 
   field ( readonly )
   OrderId,
@@ -35,12 +47,12 @@ early numbering
   action ( features : instance ) accept result [1] $self;
   action ( features : instance ) reject result [1] $self;
 
-  action (features : instance) changeStatus parameter YRD_D_OrderStatusP result [1] $self;
+  action ( features : instance ) changeStatus parameter YRD_D_OrderStatusP result [1] $self;
 
-  factory action ( features : instance ) copy deep parameter YRD_D_ORDERCOPYP [1];
+  factory action ( features : instance ) copy deep parameter YRD_D_ORDERCOPYP [1] { default function GetDefaultsForCopy; }
 
   // Dynamic Feayure control - Operations
-  association _Item { create ( features : instance ); }
+  association _Item { create ( features : instance ); with draft; }
 
   // Mapping of DB fields with Entity fields
   mapping for zyrdorder_num000 corresponding
@@ -61,29 +73,36 @@ early numbering
 
 define behavior for YRDR_ItemNmbrngTP_000 alias Item
 persistent table zyrditem_num000
+draft table zyrditem_d_000
 lock dependent by _Order
 authorization dependent by _Order
-etag dependent by _Order
+etag master LocalLastChangedAt
 early numbering
 {
   update;
   delete;
 
   field ( readonly ) ItemId, OrderId;
+  //  field ( readonly : update) CurrencyCode;
 
   field ( mandatory : create ) ProductId;
 
-  association _Order;
+  association _Order { with draft; }
 
   mapping for zyrditem_num000 corresponding
     {
-      Amount       = amount;
-      CurrencyCode = currency_code;
-      ItemId       = item_id;
-      ProductId    = product_id;
-      ReqQuantity  = req_quantity;
-      Status       = status;
-      Uom          = uom;
-      OrderId      = order_id;
+      Amount             = amount;
+      CurrencyCode       = currency_code;
+      ItemId             = item_id;
+      ProductId          = product_id;
+      ReqQuantity        = req_quantity;
+      Status             = status;
+      Uom                = uom;
+      OrderId            = order_id;
+      LastChangedAt      = last_changed_at;
+      LocalCreatedAt     = local_created_at;
+      LocalCreatedBy     = local_created_by;
+      LocalLastChangedAt = local_last_changed_at;
+      LocalLastChangedBy = local_last_changed_by;
     }
 }

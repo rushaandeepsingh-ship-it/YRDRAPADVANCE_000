@@ -18,9 +18,9 @@ CLASS lhc_Order IMPLEMENTATION.
 
     LOOP AT lt_result ASSIGNING FIELD-SYMBOL(<ls_data>).
       IF <ls_data>-NetAmount > 100.
-        APPEND VALUE #( %tky = <ls_data>-%tky ) TO failed-order.
+        APPEND VALUE #( %tky = CORRESPONDING #( <ls_data>-%tky ) ) TO failed-order.
 
-        APPEND VALUE #( %tky                = <ls_data>-%tky
+        APPEND VALUE #( %tky                = CORRESPONDING #( <ls_data>-%tky )
                         %msg                = new_message_with_text(
                         severity  = if_abap_behv_message=>severity-error
                         text      = |Order amount exceeded and can't be approved| )
@@ -29,5 +29,6 @@ CLASS lhc_Order IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
+
 
 ENDCLASS.

@@ -1,0 +1,5 @@
+@EndUserText.label: 'Service Definition Order Early Numbering with Draft'
+define service YRD_UI_OrderNmbrngDraftTP_000 {
+  expose YRDC_ORDERNMBRNGDRAFTTP_000 as OrderDraft;
+  expose YRDC_ITEMNMBRNGDRAFTTP_000  as ItemDraft;
+}

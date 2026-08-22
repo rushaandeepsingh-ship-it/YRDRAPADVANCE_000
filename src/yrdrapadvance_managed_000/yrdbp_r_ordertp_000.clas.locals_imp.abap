@@ -57,7 +57,7 @@ CLASS lhc_YRDR_OrderTP_000 IMPLEMENTATION.
     " 1. READ the order instance based on keys
     READ ENTITIES OF YRDR_OrderTP_000 IN LOCAL MODE
   ENTITY YRDR_OrderTP_000
-  FIELDS ( Status )
+  FIELDS ( OrderDate )
   WITH CORRESPONDING #( keys )
   RESULT DATA(lt_result)
   FAILED DATA(lt_failed).

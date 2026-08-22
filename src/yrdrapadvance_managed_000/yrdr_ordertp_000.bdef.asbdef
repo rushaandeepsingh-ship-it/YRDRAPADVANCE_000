@@ -1,15 +1,27 @@
 managed implementation in class yrdbp_r_ordertp_000 unique;
 strict ( 2 );
+with draft;
 
 define behavior for YRDR_OrderTP_000 //alias <alias_name>
 persistent table zyrdorder000
+draft table zyrdorder000_d
 lock master
+total etag LastChangedAt
 authorization master ( instance )
 etag master LocalLastChangedAt
 {
   create ( authorization : global );
   update;
   delete;
+
+  draft action Edit;
+  draft action Activate optimized;
+  draft action Resume;
+  draft action Discard;
+  draft determine action Prepare
+  {
+    validation check_order_date;
+  }
 
   field ( readonly )
   UUID,
@@ -26,7 +38,7 @@ etag master LocalLastChangedAt
   // Static feature control - Fields
   field ( mandatory:create, readonly : update ) CustomerId;
   // Dynamic Feayure control - Operations
-  association _Item { create ( features : instance ); }
+  association _Item { create ( features : instance ); with draft; }
 
 
   // Validations
@@ -55,6 +67,7 @@ etag master LocalLastChangedAt
 
 define behavior for YRDR_OrderItemTP_000 //alias <alias_name>
 persistent table zyrditem000
+draft table zyrditem000_d
 lock dependent by _Order
 authorization dependent by _Order
 etag dependent by _Order
@@ -71,7 +84,7 @@ etag dependent by _Order
 
   field ( mandatory : create ) ProductId;
 
-  association _Order;
+  association _Order { with draft; }
 
   mapping for zyrditem000 corresponding
     {

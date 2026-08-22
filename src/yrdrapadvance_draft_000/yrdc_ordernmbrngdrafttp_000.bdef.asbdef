@@ -1,0 +1,31 @@
+projection;
+strict ( 2 );
+use draft;
+
+define behavior for YRDC_ORDERNMBRNGDRAFTTP_000 alias Order
+{
+  use create;
+  use update;
+  use delete;
+
+  use action accept;
+  use action reject;
+  use action changeStatus;
+  use action copy;
+
+  use action Activate;
+  use action Discard;
+  use action Edit;
+  use action Resume;
+  use action Prepare;
+
+  use association _Item { create; with draft; }
+}
+
+define behavior for YRDC_ITEMNMBRNGDRAFTTP_000 alias Item
+{
+  use update;
+  use delete;
+
+  use association _Order { with draft; }
+}

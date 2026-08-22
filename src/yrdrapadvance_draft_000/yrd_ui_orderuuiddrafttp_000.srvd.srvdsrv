@@ -1,0 +1,5 @@
+@EndUserText.label: 'Service Definition Order UUID with Draft'
+define service YRD_UI_OrderUUIDDraftTP_000 {
+  expose YRDC_ORDERUUIDTP_000     as OrderUUID;
+  expose YRDC_ORDERITEMUUIDTP_000 as ItemUUID;
+}

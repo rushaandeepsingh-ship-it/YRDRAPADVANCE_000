@@ -13,6 +13,8 @@ define behavior for YRDC_OrderNmbrngTP_000 alias Order
 
   use action copy;
 
+  use function GetDefaultsForCopy;
+
   use association _Item { create; }
 }
 

@@ -1,0 +1,70 @@
+@Metadata.layer: #CORE
+
+@UI: { headerInfo: { typeName: 'Item',
+                     typeNamePlural: 'Items',
+                     title: { type: #STANDARD, value: 'ProductID' }},
+       presentationVariant: [{ visualizations: [{type: #AS_LINEITEM}]
+//                               sortOrder: [{ by: 'ProductID', direction: #ASC }]
+                             }]
+
+      }
+annotate entity YRDC_ITEMNMBRNGDRAFTTP_000
+    with 
+{
+@UI.facet: [
+        {
+          id:              'Item',
+          purpose:         #STANDARD,
+          type:            #COLLECTION,
+          label:           'Item',
+          position:        10
+        },
+        {
+          id:              'General',
+          targetQualifier: 'GeneralItem_FG',
+          parentId:        'Item',
+          purpose:         #STANDARD,
+          type:            #FIELDGROUP_REFERENCE,
+          label:           'General',
+          position:        10
+        },
+        {
+          id:              'Admin',
+          targetQualifier: 'Admin_FG',
+          parentId:        'Item',
+          purpose:         #STANDARD,
+          type:            #FIELDGROUP_REFERENCE,
+          label:           'Administrative Data',
+          position:        20
+        }
+      ]
+
+  @UI: { lineItem:          [{ position: 10 }],
+         identification:    [{ position: 10 }],
+         fieldGroup:        [{ position: 10, qualifier: 'GeneralItem_FG' }]}
+  @EndUserText.label: 'Item ID'
+  ItemId;
+  @UI: { lineItem:          [{ position: 20 }],
+         identification:    [{ position: 20 }],
+         fieldGroup:        [{ position: 20, qualifier: 'GeneralItem_FG' }]}
+  @EndUserText.label: 'Product ID'
+  ProductId;
+  @UI: { lineItem:          [{ position: 30 }],
+         identification:    [{ position: 30 }],
+         fieldGroup:        [{ position: 30, qualifier: 'GeneralItem_FG' }]}
+  @EndUserText.label: 'Required Quantity'
+  ReqQuantity;
+  @UI: { lineItem:          [{ position: 40 }],
+         identification:    [{ position: 40 }],
+         fieldGroup:        [{ position: 40, qualifier: 'GeneralItem_FG' }]}
+  @EndUserText.label: 'Amount'
+  Amount;
+  @UI: { lineItem:          [{ position: 50 }],
+         identification:    [{ position: 50 }],
+         fieldGroup:        [{ position: 50, qualifier: 'GeneralItem_FG' }]}
+  @EndUserText.label: 'Status'
+  @UI.textArrangement: #TEXT_FIRST
+
+  Status;
+    
+}
