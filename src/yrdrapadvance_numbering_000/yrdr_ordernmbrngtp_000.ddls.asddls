@@ -1,6 +1,7 @@
 @AccessControl.authorizationCheck: #NOT_REQUIRED
 @EndUserText.label: 'Order transactional View Early Numbering'
 @Metadata.ignorePropagatedAnnotations: true
+@ObjectModel.semanticKey: ['OrderId']
 define root view entity YRDR_OrderNmbrngTP_000
   as select from zyrdorder_num000
   composition [0..*] of YRDR_ItemNmbrngTP_000 as _Item

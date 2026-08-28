@@ -40,6 +40,7 @@ annotate entity YRDC_ORDERITEMUUIDTP_000
       ]
 
   @UI.hidden: true
+  @UI: { lineItem:          [{ position: 10, type: #FOR_ACTION, dataAction: 'YRDC_ORDERUUIDTP_000.addMultipleItems', label: 'Add Multiple Items' }]}
   Uuid;
   @UI.hidden: true
   ParentUuid;

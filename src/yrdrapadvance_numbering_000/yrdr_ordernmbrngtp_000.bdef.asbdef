@@ -24,6 +24,8 @@ early numbering
     validation check_order_date;
   }
 
+//  field (readonly : update) OrderId;
+
   field ( readonly )
   OrderId,
   LocalCreatedBy,

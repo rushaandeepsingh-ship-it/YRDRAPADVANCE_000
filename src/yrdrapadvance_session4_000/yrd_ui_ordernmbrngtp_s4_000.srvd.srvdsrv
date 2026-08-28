@@ -1,0 +1,5 @@
+@EndUserText.label: 'Service Definition Order Early Numbering'
+define service YRD_UI_OrderNmbrngTP_S4_000 {
+  expose YRDC_ORDERNMBRNGTP_S4_000;
+  expose YRDC_ITEMNMBRNGTP_S4_000;
+}

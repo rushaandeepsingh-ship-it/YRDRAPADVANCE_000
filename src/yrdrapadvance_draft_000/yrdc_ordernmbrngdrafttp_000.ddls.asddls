@@ -2,6 +2,7 @@
 @EndUserText.label: 'Order Projection View Early Numbering'
 @Metadata.ignorePropagatedAnnotations: true
 @Metadata.allowExtensions: true
+@ObjectModel.semanticKey: ['OrderId']
 define root view entity YRDC_ORDERNMBRNGDRAFTTP_000
   provider contract transactional_query
   as projection on YRDR_OrderNmbrngTP_000

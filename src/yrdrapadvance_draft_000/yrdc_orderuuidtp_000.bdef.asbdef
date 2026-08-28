@@ -1,6 +1,7 @@
-projection;
+projection implementation in class yrdbp_c_orderuuidtp_000 unique;
 strict ( 2 );
 use draft;
+use side effects;
 
 define behavior for YRDC_ORDERUUIDTP_000 //alias <alias_name>
 {
@@ -14,7 +15,22 @@ define behavior for YRDC_ORDERUUIDTP_000 //alias <alias_name>
   use action Discard;
   use action Prepare;
 
-  use association _Item { create; with draft; }
+  use action copy;
+  use action( precheck ) changeStatus;
+
+  use function GetDefaultsForCopy;
+
+  use action checkOrderDate;
+
+  action (features : instance) addMultipleItems result [0..*] entity YRDC_ORDERITEMUUIDTP_000;
+
+  use association _Item { create ( augment ); with draft; }
+
+  side effects
+  {
+    action addMultipleItems affects entity _Item;
+    field Status affects permissions ( action addMultipleItems );
+  }
 }
 
 define behavior for YRDC_ORDERITEMUUIDTP_000 //alias <alias_name>

@@ -41,7 +41,7 @@ annotate entity YRDC_ORDERNMBRNGDRAFTTP_000 with
           }
         ]
 
-  @UI: { lineItem:          [{ position: 10, type: #FOR_ACTION, dataAction: 'accept', label: 'Approve' },
+  @UI: { lineItem:          [{ position: 10, importance: #HIGH, type: #FOR_ACTION, dataAction: 'accept', label: 'Approve' },
                              { position: 20, type: #FOR_ACTION, dataAction: 'reject', label: 'Reject' },
                              { position: 30, type: #FOR_ACTION, dataAction: 'copy', label: 'Copy Order' },
                              { position: 40, type: #FOR_ACTION, dataAction: 'changeStatus', label: 'Change Status' }  ],
@@ -102,7 +102,13 @@ annotate entity YRDC_ORDERNMBRNGDRAFTTP_000 with
   @UI: { lineItem:        [{ position: 90 }],
        selectionField:  [{ position: 90 }],
        fieldGroup:      [{ position: 90, qualifier: 'Admin_FG' }]}
-  @EndUserText.label:     'Last Changed At'
+  @EndUserText.label:     'Last Changed At(Local)'
   LocalLastChangedAt;
+
+  @UI: { lineItem:        [{ position: 100 }],
+     selectionField:  [{ position: 100 }],
+     fieldGroup:      [{ position: 100, qualifier: 'Admin_FG' }]}
+  @EndUserText.label:     'Last Changed At'
+  LastChangedAt;
 
 }

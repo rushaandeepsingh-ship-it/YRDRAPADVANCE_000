@@ -4,6 +4,8 @@
 define root view entity YRDR_OrderTP_000
   as select from zyrdorder000
   composition [1..*] of YRDR_OrderItemTP_000 as _Item
+  association [0..1] to YRDI_OrderStatus_VH  as _OrderStatusTxt on $projection.Status = _OrderStatusTxt.Status
+
 {
 
   key uuid                  as Uuid,
@@ -24,5 +26,6 @@ define root view entity YRDR_OrderTP_000
       local_last_changed_at as LocalLastChangedAt,
       @Semantics.systemDateTime.lastChangedAt: true
       last_changed_at       as LastChangedAt,
-      _Item
+      _Item,
+      _OrderStatusTxt
 }

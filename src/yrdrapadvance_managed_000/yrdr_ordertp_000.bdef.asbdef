@@ -21,10 +21,14 @@ etag master LocalLastChangedAt
   draft determine action Prepare
   {
     validation check_order_date;
+    validation YRDR_OrderItemTP_000~checkMandatoryFields;
   }
 
   field ( readonly )
   UUID,
+  OrderId,
+  NetAmount,
+  CurrencyCode,
   LocalCreatedBy,
   LocalCreatedAt,
   LocalLastChangedBy,
@@ -34,9 +38,9 @@ etag master LocalLastChangedAt
   // Managed numbering for GUID generation
   field ( numbering : managed ) Uuid;
   // Dynamic Feature Control - Fields
-  field ( features : instance ) NetAmount, CurrencyCode;
+  //  field ( features : instance ) NetAmount, CurrencyCode;
   // Static feature control - Fields
-  field ( mandatory:create, readonly : update ) CustomerId;
+  field ( mandatory : create, readonly : update ) CustomerId;
   // Dynamic Feayure control - Operations
   association _Item { create ( features : instance ); with draft; }
 
@@ -47,6 +51,25 @@ etag master LocalLastChangedAt
   // Determination
   determination fill_status on modify { field CustomerId; }
 
+  determination set_order_id on save { field CustomerId; }
+
+  // Action
+  action ( features : instance ) changeStatus parameter YRD_D_OrderStatusP result [1] $self;
+
+  factory action ( features : instance ) copy deep parameter YRD_D_ORDERCOPYP [1] { default function GetDefaultsForCopy; }
+
+  // internal Action
+  internal action CalctNetAmount;
+
+  // Determine Action
+  determine action checkOrderDate { validation check_order_date; }
+
+  // Side Effects
+  side effects
+  {
+    determine action checkOrderDate executed on field OrderDate affects messages;
+    field Status affects permissions ( create _Item, field NetAmount );
+  }
   // Mapping of DB fields with Entity fields
   mapping for zyrdorder000 corresponding
     {
@@ -72,19 +95,34 @@ lock dependent by _Order
 authorization dependent by _Order
 etag dependent by _Order
 {
-  update;
+  update(features : instance);
   delete;
 
   field ( readonly )
   UUID,
-  ParentUUID;
+  ParentUUID,
+  ItemId;
+
 
   field ( numbering : managed )
   UUID;
 
-  field ( mandatory : create ) ProductId;
+  //  field ( mandatory : create, readonly : update ) ProductId;
+
+  field ( features : instance ) ProductId;
+
+  determination set_item_id on save { create; }
+
+  determination calculateOrderprice on modify { field Amount; }
+
+  validation checkMandatoryFields on save { create; update; }
 
   association _Order { with draft; }
+
+  side effects
+  {
+    field Amount affects field _Order.NetAmount, field _Order.CurrencyCode;
+  }
 
   mapping for zyrditem000 corresponding
     {

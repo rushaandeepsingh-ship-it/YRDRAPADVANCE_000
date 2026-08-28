@@ -147,13 +147,27 @@ CLASS lhc_Order IMPLEMENTATION.
     " Set Order ID
     LOOP AT lt_entities_wo_orderid INTO entity.
       lv_order_id_max += 1.
-      entity-%key-OrderId = lv_order_id_max .
 
-      APPEND VALUE #( %cid      = entity-%cid
+      " 1. Update local entity key tracking if necessary
+      entity-%key-OrderId = lv_order_id_max.
+
+      " 2. Explicitly map components to ensure %is_draft is never lost
+      APPEND VALUE #(
+        %cid      = entity-%cid
+        %is_draft = entity-%is_draft " Crucial for the UI framework
+        OrderId   = lv_order_id_max
+
+        " Explicitly build %key
+        %key      = VALUE #( OrderId = lv_order_id_max )
+
+        " Explicitly build %tky (Total Key) instead of using CORRESPONDING
+        %tky      = VALUE #(
+                      OrderId  = lv_order_id_max
                       %is_draft = entity-%is_draft
-                      %key      = entity-%key
-                    ) TO mapped-order.
+                    )
+      ) TO mapped-order.
     ENDLOOP.
+
 
 
   ENDMETHOD.
@@ -310,7 +324,7 @@ CLASS lhc_Order IMPLEMENTATION.
     LOOP AT keys INTO DATA(key).
       READ TABLE lt_order ASSIGNING FIELD-SYMBOL(<ls_order>) WITH KEY id COMPONENTS %tky = key-%tky.
       IF sy-subrc EQ 0.
-        "Fill travel container for creating new travel instance
+        "Fill Order container for creating new Order instance
         APPEND VALUE #( %cid        = key-%cid
                         %is_draft   = key-%param-%is_draft
                         %data       = CORRESPONDING #( <ls_order> EXCEPT orderid ) ) TO lt_order_copy ASSIGNING FIELD-SYMBOL(<ls_new_order>).
@@ -330,7 +344,7 @@ CLASS lhc_Order IMPLEMENTATION.
             "Fill Item container for creating Items with cba
             APPEND VALUE #( %cid      = key-%cid && shift_left( <ls_item>-ItemId )
                             %is_draft = key-%param-%is_draft
-                            %data     = CORRESPONDING #( lt_items[ KEY entity %tky = <ls_item>-%tky ] EXCEPT orderid ) )
+                            %data     = CORRESPONDING #( lt_items[ KEY id %tky = <ls_item>-%tky ] EXCEPT orderid ) )
               TO <ls_item_cba>-%target ASSIGNING FIELD-SYMBOL(<ls_new_item>).
 
           ENDLOOP.

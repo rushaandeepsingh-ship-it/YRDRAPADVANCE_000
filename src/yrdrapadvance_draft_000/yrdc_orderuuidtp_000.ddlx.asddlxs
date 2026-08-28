@@ -42,6 +42,10 @@ annotate entity YRDC_ORDERUUIDTP_000 with
       ]
 
   @UI.hidden: true
+  @UI: { lineItem:          [{ position: 10, importance: #HIGH, type: #FOR_ACTION, dataAction: 'copy', label: 'Copy Order' },
+                             { position: 20, type: #FOR_ACTION, dataAction: 'changeStatus', label: 'Change Status' }  ],
+         selectionField:    [{ position: 10 }],
+         fieldGroup:        [{ position: 10, qualifier: 'General_FG' }]}
   Uuid;
   @UI: { lineItem:          [{ position: 10 }],
          selectionField:    [{ position: 10 }],
