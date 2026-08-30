@@ -26,6 +26,8 @@ define behavior for YRDC_ORDERUUIDTP_000 //alias <alias_name>
 
   use association _Item { create ( augment ); with draft; }
 
+  use event orderStatusUpdated;
+
   side effects
   {
     action addMultipleItems affects entity _Item;

@@ -1,3 +1,169 @@
+CLASS lsc_yrdr_ordertp_000 DEFINITION INHERITING FROM cl_abap_behavior_saver.
+
+  PROTECTED SECTION.
+
+    METHODS save_modified REDEFINITION.
+
+ENDCLASS.
+
+CLASS lsc_yrdr_ordertp_000 IMPLEMENTATION.
+
+  METHOD save_modified.
+    DATA : lt_order_log_create TYPE STANDARD TABLE OF yrd_log_order,
+           lt_item_log_create  TYPE STANDARD TABLE OF yrd_log_order,
+           lt_order_log        TYPE STANDARD TABLE OF yrd_log_order,
+           lt_order_log_update TYPE STANDARD TABLE OF yrd_log_order,
+           lt_item_log_update  TYPE STANDARD TABLE OF yrd_log_order.
+
+
+    " (1) Get instance data of all instances that have been created
+    IF create-yrdr_ordertp_000 IS NOT INITIAL.
+
+      lt_order_log_create = CORRESPONDING #( create-yrdr_ordertp_000  ).
+      LOOP AT lt_order_log_create ASSIGNING FIELD-SYMBOL(<ls_order_log>).
+        <ls_order_log>-changing_operation = 'C'.
+        <ls_order_log>-table_name = 'ZYRDORDER000'.
+        READ TABLE create-yrdr_ordertp_000 WITH TABLE KEY entity COMPONENTS Uuid = <ls_order_log>-uuid INTO DATA(ls_order).
+        IF sy-subrc = 0.
+          <ls_order_log>-objectkey  = |{ ls_order-OrderId }|.
+        ENDIF.
+
+        GET TIME STAMP FIELD <ls_order_log>-created_at.
+        " Generate uuid as value of the change_id field
+        TRY.
+            <ls_order_log>-change_id = cl_system_uuid=>create_uuid_x16_static( ) .
+          CATCH cx_uuid_error.
+            "handle exception
+        ENDTRY.
+
+      ENDLOOP.
+
+      INSERT yrd_log_order FROM TABLE @lt_order_log_create.
+
+    ENDIF.
+
+    IF Create-yrdr_orderitemtp_000 IS NOT INITIAL.
+      lt_item_log_create = CORRESPONDING #( create-yrdr_orderitemtp_000  ).
+      LOOP AT lt_item_log_create ASSIGNING FIELD-SYMBOL(<ls_item_log>).
+        <ls_item_log>-changing_operation = 'C'.
+        <ls_item_log>-table_name = 'ZYRDITEM000'.
+
+        READ ENTITIES OF yrdr_ordertp_000 IN LOCAL MODE
+        ENTITY YRDR_OrderItemTP_000 BY \_Order
+        ALL FIELDS WITH CORRESPONDING #( Create-yrdr_orderitemtp_000 )
+        RESULT DATA(lt_order).
+
+        READ TABLE create-yrdr_orderitemtp_000 WITH TABLE KEY entity COMPONENTS Uuid = <ls_item_log>-uuid INTO DATA(ls_item).
+        IF sy-subrc = 0.
+          " Get Order ID
+          READ TABLE lt_order INTO DATA(ls_order_id) WITH TABLE KEY entity COMPONENTS Uuid = ls_item-ParentUuid.
+          IF sy-subrc = 0.
+            <ls_item_log>-objectkey  = |{ ls_order_id-OrderId }-{ shift_left( ls_item-ItemId ) }|.
+          ENDIF.
+        ENDIF.
+
+        GET TIME STAMP FIELD <ls_item_log>-created_at.
+        " Generate uuid as value of the change_id field
+        TRY.
+            <ls_item_log>-change_id = cl_system_uuid=>create_uuid_x16_static( ) .
+          CATCH cx_uuid_error.
+            "handle exception
+        ENDTRY.
+
+      ENDLOOP.
+
+      INSERT yrd_log_order FROM TABLE @lt_item_log_create.
+
+    ENDIF.
+
+    " (2) Get instance data of all instances that have been updated during the transaction
+
+    IF update-yrdr_ordertp_000 IS NOT INITIAL.
+
+      lt_order_log = CORRESPONDING #( update-yrdr_ordertp_000 ).
+
+      READ ENTITIES OF yrdr_ordertp_000 IN LOCAL MODE
+      ENTITY YRDR_OrderTP_000
+      ALL FIELDS WITH CORRESPONDING #( update-yrdr_ordertp_000 )
+      RESULT DATA(lt_order_id).
+
+      LOOP AT update-yrdr_ordertp_000 ASSIGNING FIELD-SYMBOL(<ls_update>).
+
+        ASSIGN lt_order_log[ uuid = <ls_update>-uuid ] TO FIELD-SYMBOL(<ls_order_log_db>).
+        <ls_order_log_db>-changing_operation = 'U'.
+
+        READ TABLE lt_order_id INTO ls_order_id WITH TABLE KEY entity COMPONENTS
+        %key = <ls_update>-%key.
+        <ls_order_log_db>-objectkey  = ls_order_id-OrderId.
+        <ls_order_log_db>-table_name = 'ZYRDORDER000'.
+
+        " Generate time stamp
+        GET TIME STAMP FIELD <ls_order_log_db>-created_at.
+
+        " Check if Net Amount is updated
+        IF <ls_update>-%control-NetAmount = if_abap_behv=>mk-on.
+          <ls_order_log_db>-changed_value = <ls_update>-NetAmount.
+          " Generate uuid as value of the change_id field
+          TRY.
+              <ls_order_log_db>-change_id = cl_system_uuid=>create_uuid_x16_static( ) .
+            CATCH cx_uuid_error.
+              "handle exception
+          ENDTRY.
+
+          <ls_order_log_db>-changed_field_name = 'NetAmount'.
+
+          APPEND <ls_order_log_db> TO lt_order_log_update.
+
+        ENDIF.
+
+        " Check if Status is updated
+        IF <ls_update>-%control-Status = if_abap_behv=>mk-on.
+          <ls_order_log_db>-changed_value = <ls_update>-Status.
+          " Generate uuid as value of the change_id field
+          TRY.
+              <ls_order_log_db>-change_id = cl_system_uuid=>create_uuid_x16_static( ) .
+            CATCH cx_uuid_error.
+              "handle exception
+          ENDTRY.
+
+          <ls_order_log_db>-changed_field_name = 'Status'.
+
+          APPEND <ls_order_log_db> TO lt_order_log_update.
+
+          "Raise event for local consumption
+          RAISE ENTITY EVENT YRDR_OrderTP_000~orderStatusUpdatedLocal
+          FROM VALUE #( ( %key             =   <ls_update>-%key
+                          order_status     =   <ls_update>-Status
+                          orderid          =   ls_order_id-OrderId ) ).
+
+        ENDIF.
+
+        " Check if Order Date is updated
+        IF <ls_update>-%control-OrderDate = if_abap_behv=>mk-on.
+          <ls_order_log_db>-changed_value = <ls_update>-OrderDate.
+          " Generate uuid as value of the change_id field
+          TRY.
+              <ls_order_log_db>-change_id = cl_system_uuid=>create_uuid_x16_static( ) .
+            CATCH cx_uuid_error.
+              "handle exception
+          ENDTRY.
+
+          <ls_order_log_db>-changed_field_name = 'OrderDate'.
+
+          APPEND <ls_order_log_db> TO lt_order_log_update.
+
+        ENDIF.
+
+      ENDLOOP.
+
+      INSERT yrd_log_order FROM TABLE @lt_order_log_update.
+
+    ENDIF.
+
+  ENDMETHOD.
+
+ENDCLASS.
+
 CLASS lhc_yrdr_orderitemtp_000 DEFINITION INHERITING FROM cl_abap_behavior_handler.
 
   PRIVATE SECTION.

@@ -4,12 +4,17 @@ with draft;
 
 define behavior for YRDR_OrderTP_000 //alias <alias_name>
 persistent table zyrdorder000
+with additional save
 draft table zyrdorder000_d
 lock master
 total etag LastChangedAt
 authorization master ( instance )
 etag master LocalLastChangedAt
+changedocuments master ( YRD_ORDER_CDH )
 {
+
+  changedocuments (create : key, update : data, delete : none);
+
   create ( authorization : global );
   update;
   delete;
@@ -64,11 +69,18 @@ etag master LocalLastChangedAt
   // Determine Action
   determine action checkOrderDate { validation check_order_date; }
 
+  // Events for side effects
+  event orderStatusUpdated for side effects;
+
+  // Events for local consumption
+  event orderStatusUpdatedLocal parameter YRD_D_OrderStatus_000_P;
+
   // Side Effects
   side effects
   {
     determine action checkOrderDate executed on field OrderDate affects messages;
     field Status affects permissions ( create _Item, field NetAmount );
+    event orderStatusUpdated affects field Status, field OrderDate;
   }
   // Mapping of DB fields with Entity fields
   mapping for zyrdorder000 corresponding
@@ -90,11 +102,15 @@ etag master LocalLastChangedAt
 
 define behavior for YRDR_OrderItemTP_000 //alias <alias_name>
 persistent table zyrditem000
+with additional save
 draft table zyrditem000_d
 lock dependent by _Order
 authorization dependent by _Order
 etag dependent by _Order
+changedocuments dependent by _Order
 {
+  changedocuments (delete : data, create : data);
+
   update(features : instance);
   delete;
 

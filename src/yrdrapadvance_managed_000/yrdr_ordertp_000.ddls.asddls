@@ -5,27 +5,29 @@ define root view entity YRDR_OrderTP_000
   as select from zyrdorder000
   composition [1..*] of YRDR_OrderItemTP_000 as _Item
   association [0..1] to YRDI_OrderStatus_VH  as _OrderStatusTxt on $projection.Status = _OrderStatusTxt.Status
-
+  //  association of one to many I_ChangeDocument_2  as _ChangeDocs
+  //    on _ChangeDocs.ChangeDocObjectClass = 'YRD_ORDER_CDH'
+  //    and _ChangeDocs.ChangeDocObject     = $projection.Uuid
 {
 
-  key uuid                  as Uuid,
-      order_id              as OrderId,
-      customer_id           as CustomerId,
-      order_date            as OrderDate,
-      status                as Status,
-      currency_code         as CurrencyCode,
+  key uuid                                      as Uuid,
+      order_id                                  as OrderId,
+      customer_id                               as CustomerId,
+      cast(order_date as YRDBT_OrderDate )      as OrderDate,
+      cast(status as YRDBT_ORDERSTATUS )        as Status,
+      currency_code                             as CurrencyCode,
       @Semantics.amount.currencyCode: 'CurrencyCode'
-      net_amount            as NetAmount,
+      cast(net_amount as YRDBT_OrderNetAmount ) as NetAmount,
       @Semantics.user.createdBy: true
-      local_created_by      as LocalCreatedBy,
+      local_created_by                          as LocalCreatedBy,
       @Semantics.systemDateTime.createdAt: true
-      local_created_at      as LocalCreatedAt,
+      local_created_at                          as LocalCreatedAt,
       @Semantics.user.localInstanceLastChangedBy: true
-      local_last_changed_by as LocalLastChangedBy,
+      local_last_changed_by                     as LocalLastChangedBy,
       @Semantics.systemDateTime.localInstanceLastChangedAt: true
-      local_last_changed_at as LocalLastChangedAt,
+      local_last_changed_at                     as LocalLastChangedAt,
       @Semantics.systemDateTime.lastChangedAt: true
-      last_changed_at       as LastChangedAt,
+      last_changed_at                           as LastChangedAt,
       _Item,
       _OrderStatusTxt
 }

@@ -1,0 +1,3 @@
+@EndUserText.label: 'Order Date'
+@AbapCatalog.typeSpec.changeDocumentRelevant: true
+define type YRDBT_OrderDate: abap.datn;
