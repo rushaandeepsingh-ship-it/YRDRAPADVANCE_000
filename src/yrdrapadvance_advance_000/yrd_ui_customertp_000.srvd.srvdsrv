@@ -1,0 +1,7 @@
+@EndUserText.label: 'Service definition for Customer'
+define service YRD_UI_CustomerTP_000 {
+  expose YRDRC_CustomerTP_000      as Customer;
+  expose YRDC_PaymentTP_000        as Payment_1;
+  expose YRDC_AddressTP_000        as Address;
+  expose YRDC_OrderDependentTP_000 as OrderDependent;
+}

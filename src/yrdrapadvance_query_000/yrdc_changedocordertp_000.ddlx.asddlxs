@@ -1,0 +1,48 @@
+@Metadata.layer: #CORE
+annotate entity YRDC_ChangeDocOrderTP_000 with
+{
+  @UI.hidden: true
+  objectid;
+  @UI: { lineItem: [{ position: 10, importance: #HIGH }]}
+  @EndUserText.label: 'Change Document'
+  changenr;
+  @UI: { lineItem: [{ position: 30}]}
+  @EndUserText.label: 'Object Key'
+  tabkey;
+  @UI: { lineItem: [{ position: 50}]}
+  @EndUserText.label: 'Change Document'
+  chngind;
+  @UI: { lineItem: [{ position: 40}]}
+  @EndUserText.label: 'Field Name'
+  fname;
+  @UI: { lineItem: [{ position: 20}]}
+  @EndUserText.label: 'Table Name'
+  tabname;
+  @UI: { lineItem: [{ position: 60}]}
+  @EndUserText.label: 'Field Name'  
+  ftext;
+  @UI: { lineItem: [{ position: 70}]}
+  @EndUserText.label: 'Old Value'  
+  f_old;
+  @UI: { lineItem: [{ position: 80}]}
+  @EndUserText.label: 'New Value'  
+  f_new;
+    @UI: { lineItem: [{ position: 90}]}
+  @EndUserText.label: 'Changed By'
+  username;
+  @UI: { lineItem: [{ position: 100}]}
+  @EndUserText.label: 'ChangedAt Date'  
+  udate;
+  @UI: { lineItem: [{ position: 110}]}
+  @EndUserText.label: 'ChangedAt Time'  
+  utime;
+  @UI: { selectionField: [{ position: 10 }] }
+  @Consumption : { filter : { selectionType: #SINGLE, mandatory: true, multipleSelections: false }}
+  @EndUserText.label: 'Start Date'  
+  StartDate;
+  @UI: { selectionField: [{ position: 20 }] }
+  @Consumption : { filter : { selectionType: #SINGLE, mandatory: true, multipleSelections: false }}
+  @EndUserText.label: 'End Date'    
+  EndDate;
+
+}

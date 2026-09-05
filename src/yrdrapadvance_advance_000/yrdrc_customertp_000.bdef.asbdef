@@ -1,0 +1,39 @@
+projection implementation in class yrdbp_c_customertp_000 unique;
+strict ( 2 );
+use collaborative draft;
+use side effects;
+
+define behavior for YRDRC_CustomerTP_000 alias Customer
+{
+  use create;
+  use update;
+  use delete;
+
+  use action Activate;
+  use action Edit;
+  use action Discard;
+  use action Resume;
+  use action Prepare;
+  use action Share;
+
+  use association _Address { create; with draft; }
+//  use association _Payment { create; with draft; }
+
+  use association _Order { create(augment); with dependent draft; }
+}
+
+define behavior for YRDC_AddressTP_000 alias Address
+{
+  use update;
+  use delete;
+
+  use association _Customer { with draft; }
+}
+
+//define behavior for YRDC_PaymentTP_000 alias Payment_1
+//{
+//  use update;
+//  use delete;
+//
+//  use association _Customer { with draft; }
+//}

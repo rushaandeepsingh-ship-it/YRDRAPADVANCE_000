@@ -20,9 +20,9 @@ CLASS yrdcl_snro_usage IMPLEMENTATION.
     TRY.
         cl_numberrange_intervals=>create(
           EXPORTING
-            object = 'YRDRAP_ORD'
+            object = 'YRDNR_CUS'
             interval = VALUE #( ( nrrangenr = '01'
-                                  fromnumber = '1000000000'
+                                  fromnumber = '000000001'
                                   tonumber   = '1999999999'
                                   procind    = 'I' ) )   " I=内部
           IMPORTING error = data(lv_err) ).

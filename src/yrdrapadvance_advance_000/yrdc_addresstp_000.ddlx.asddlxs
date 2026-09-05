@@ -1,0 +1,105 @@
+@Metadata.layer: #CORE
+
+@UI: { headerInfo: { typeName: 'Address',
+                     typeNamePlural: 'Addresses',
+                     title: { type: #STANDARD, value: 'AddressCode' }},
+       presentationVariant: [{ visualizations: [{type: #AS_LINEITEM}]
+//                               sortOrder: [{ by: 'ProductID', direction: #ASC }]
+                             }]
+
+      }
+
+annotate entity YRDC_AddressTP_000 with
+{
+  @UI.facet: [
+          {
+            id:              'Address',
+            purpose:         #STANDARD,
+            type:            #COLLECTION,
+            label:           'Address',
+            position:        10
+          },
+          {
+            id:              'General',
+            targetQualifier: 'GeneralAddress_FG',
+            parentId:        'Address',
+            purpose:         #STANDARD,
+            type:            #FIELDGROUP_REFERENCE,
+            label:           'General',
+            position:        10
+          },
+          {
+            id:              'Admin',
+            targetQualifier: 'Admin_FG',
+            parentId:        'Address',
+            purpose:         #STANDARD,
+            type:            #FIELDGROUP_REFERENCE,
+            label:           'Administrative Data',
+            position:        20
+          }
+        ]
+  @UI.hidden: true
+  Uuid;
+
+  @UI.hidden: true
+  CustomerUuid;
+  @UI: { lineItem:          [{ position: 10 }],
+         identification:    [{ position: 10 }],
+         fieldGroup:        [{ position: 10, qualifier: 'GeneralAddress_FG' }]}
+  @EndUserText.label: 'Address Type'
+  AddressCode;
+
+  @UI: { lineItem:          [{ position: 20 }],
+         identification:    [{ position: 20 }],
+         fieldGroup:        [{ position: 20, qualifier: 'GeneralAddress_FG' }]}
+  @EndUserText.label: 'Default Address'
+  DefaultAddress;
+
+  @UI: { lineItem:          [{ position: 30 }],
+         identification:    [{ position: 30 }],
+         fieldGroup:        [{ position: 30, qualifier: 'GeneralAddress_FG' }]}
+  @EndUserText.label: 'Street'
+  Street;
+
+  @UI: { lineItem:          [{ position: 40 }],
+         identification:    [{ position: 40 }],
+         fieldGroup:        [{ position: 40, qualifier: 'GeneralAddress_FG' }]}
+  @EndUserText.label: 'Postal Code'
+  PostalCode;
+
+  @UI: { lineItem:          [{ position: 50 }],
+         identification:    [{ position: 50 }],
+         fieldGroup:        [{ position: 50, qualifier: 'GeneralAddress_FG' }]}
+  @EndUserText.label: 'City'
+  City;
+
+  @UI: { lineItem:          [{ position: 60 }],
+         identification:    [{ position: 60 }],
+         fieldGroup:        [{ position: 60, qualifier: 'GeneralAddress_FG' }]}
+  @EndUserText.label: 'Country'
+  CountryCode;
+//  @UI: { lineItem:        [{ position: 70 }],
+//         selectionField:  [{ position: 70 }],
+//         fieldGroup:      [{ position: 70, qualifier: 'Admin_FG' }]}
+//  @EndUserText.label:     'Created By'
+//  LocalCreatedBy;
+//
+//  @UI: { lineItem:        [{ position: 80 }],
+//         selectionField:  [{ position: 80 }],
+//         fieldGroup:      [{ position: 80, qualifier: 'Admin_FG' }]}
+//  @EndUserText.label:     'Created At'
+//  LocalCreatedAt;
+//
+//  @UI: { lineItem:        [{ position: 90 }],
+//         selectionField:  [{ position: 90 }],
+//         fieldGroup:      [{ position: 90, qualifier: 'Admin_FG' }]}
+//  @EndUserText.label:     'Last Changed By'
+//  LocalLastChangedBy;
+//
+//  @UI: { lineItem:        [{ position: 100 }],
+//       selectionField:  [{ position: 100 }],
+//       fieldGroup:      [{ position: 100, qualifier: 'Admin_FG' }]}
+//  @EndUserText.label:     'Last Changed At'
+//  LocalLastChangedAt;
+
+}

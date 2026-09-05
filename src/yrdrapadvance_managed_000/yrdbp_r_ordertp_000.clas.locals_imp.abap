@@ -29,6 +29,7 @@ CLASS lsc_yrdr_ordertp_000 IMPLEMENTATION.
         ENDIF.
 
         GET TIME STAMP FIELD <ls_order_log>-created_at.
+        <ls_order_log>-created_by = sy-uname.
         " Generate uuid as value of the change_id field
         TRY.
             <ls_order_log>-change_id = cl_system_uuid=>create_uuid_x16_static( ) .
@@ -47,6 +48,7 @@ CLASS lsc_yrdr_ordertp_000 IMPLEMENTATION.
       LOOP AT lt_item_log_create ASSIGNING FIELD-SYMBOL(<ls_item_log>).
         <ls_item_log>-changing_operation = 'C'.
         <ls_item_log>-table_name = 'ZYRDITEM000'.
+        <ls_item_log>-created_by = sy-uname.
 
         READ ENTITIES OF yrdr_ordertp_000 IN LOCAL MODE
         ENTITY YRDR_OrderItemTP_000 BY \_Order
@@ -99,6 +101,8 @@ CLASS lsc_yrdr_ordertp_000 IMPLEMENTATION.
 
         " Generate time stamp
         GET TIME STAMP FIELD <ls_order_log_db>-created_at.
+
+        <ls_order_log_db>-created_by = sy-uname.
 
         " Check if Net Amount is updated
         IF <ls_update>-%control-NetAmount = if_abap_behv=>mk-on.
@@ -339,6 +343,8 @@ CLASS lhc_YRDR_OrderTP_000 DEFINITION INHERITING FROM cl_abap_behavior_handler.
        keys FOR ACTION yrdr_ordertp_000~copy.
     METHODS calctnetamount FOR MODIFY
        keys FOR ACTION yrdr_ordertp_000~calctnetamount.
+    METHODS getdefaultsforcreate FOR READ
+       keys FOR FUNCTION yrdr_ordertp_000~getdefaultsforcreate RESULT result.
 
 ENDCLASS.
 
@@ -621,6 +627,19 @@ CLASS lhc_YRDR_OrderTP_000 IMPLEMENTATION.
     UPDATE
     FIELDS ( NetAmount CurrencyCode )
     WITH CORRESPONDING #( lt_order ).
+
+  ENDMETHOD.
+
+  METHOD GetDefaultsForCreate.
+
+
+    LOOP AT keys ASSIGNING FIELD-SYMBOL(<ls_key>).
+
+      INSERT INITIAL LINE INTO TABLE result ASSIGNING FIELD-SYMBOL(<ls_result>).
+      <ls_result> = CORRESPONDING #( <ls_key> ).
+      <ls_result>-%param = VALUE #( Status      =   '01'
+                                    OrderDate   =   cl_abap_context_info=>get_system_date( ) ).
+    ENDLOOP.
 
   ENDMETHOD.
 

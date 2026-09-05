@@ -1,18 +1,16 @@
 @AccessControl.authorizationCheck: #NOT_REQUIRED
-@EndUserText.label: 'Order Projection View Transactional'
+@EndUserText.label: 'Order Dependent Projection View'
 @Metadata.ignorePropagatedAnnotations: true
 @Metadata.allowExtensions: true
-@ObjectModel.semanticKey: [ 'OrderId' ]
-define root view entity YRDC_ORDERUUIDTP_000
+define root view entity YRDC_OrderDependentTP_000
   provider contract transactional_query
   as projection on YRDR_OrderTP_000
 {
   key Uuid,
       OrderId,
-      @ObjectModel.text.element: [ 'CustomerName' ]
       CustomerId,
+      customeruuid,
       OrderDate,
-      @ObjectModel.text.element: [ 'OrderStatusText' ]
       Status,
       CurrencyCode,
       @Semantics.amount.currencyCode: 'CurrencyCode'
@@ -22,8 +20,6 @@ define root view entity YRDC_ORDERUUIDTP_000
       LocalLastChangedBy,
       LocalLastChangedAt,
       LastChangedAt,
-      _OrderStatusTxt.StatusText as OrderStatusText,
-      _Customer.Name             as CustomerName,
-      /* Associations */
-      _Item : redirected to composition child YRDC_ORDERITEMUUIDTP_000
+      _OrderStatusTxt,
+      _Customer : redirected to YRDRC_CustomerTP_000
 }

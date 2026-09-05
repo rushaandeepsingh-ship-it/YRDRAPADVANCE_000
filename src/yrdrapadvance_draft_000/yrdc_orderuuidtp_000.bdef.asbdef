@@ -1,6 +1,7 @@
 projection implementation in class yrdbp_c_orderuuidtp_000 unique;
 strict ( 2 );
-use draft;
+use collaborative draft;
+//use draft;
 use side effects;
 
 define behavior for YRDC_ORDERUUIDTP_000 //alias <alias_name>
@@ -14,11 +15,13 @@ define behavior for YRDC_ORDERUUIDTP_000 //alias <alias_name>
   use action Resume;
   use action Discard;
   use action Prepare;
+  use action Share;
 
   use action copy;
   use action( precheck ) changeStatus;
 
   use function GetDefaultsForCopy;
+  use function GetDefaultsForCreate;
 
   use action checkOrderDate;
 

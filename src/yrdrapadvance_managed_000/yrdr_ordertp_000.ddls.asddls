@@ -5,14 +5,14 @@ define root view entity YRDR_OrderTP_000
   as select from zyrdorder000
   composition [1..*] of YRDR_OrderItemTP_000 as _Item
   association [0..1] to YRDI_OrderStatus_VH  as _OrderStatusTxt on $projection.Status = _OrderStatusTxt.Status
-  //  association of one to many I_ChangeDocument_2  as _ChangeDocs
-  //    on _ChangeDocs.ChangeDocObjectClass = 'YRD_ORDER_CDH'
-  //    and _ChangeDocs.ChangeDocObject     = $projection.Uuid
+  // Cross-BO association
+  association [0..1] to YRDR_CustomerTP_000  as _Customer       on $projection.customeruuid = _Customer.Uuid
 {
 
   key uuid                                      as Uuid,
       order_id                                  as OrderId,
       customer_id                               as CustomerId,
+      customeruuid,
       cast(order_date as YRDBT_OrderDate )      as OrderDate,
       cast(status as YRDBT_ORDERSTATUS )        as Status,
       currency_code                             as CurrencyCode,
@@ -29,5 +29,6 @@ define root view entity YRDR_OrderTP_000
       @Semantics.systemDateTime.lastChangedAt: true
       last_changed_at                           as LastChangedAt,
       _Item,
-      _OrderStatusTxt
+      _OrderStatusTxt,
+      _Customer
 }

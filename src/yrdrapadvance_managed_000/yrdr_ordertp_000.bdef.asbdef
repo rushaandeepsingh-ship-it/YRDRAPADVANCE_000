@@ -1,11 +1,12 @@
 managed implementation in class yrdbp_r_ordertp_000 unique;
 strict ( 2 );
-with draft;
+with collaborative draft;
+with cross associations;
 
 define behavior for YRDR_OrderTP_000 //alias <alias_name>
 persistent table zyrdorder000
 with additional save
-draft table zyrdorder000_d
+draft table zyrdorder000_d query YRDR_OrderDraftTP_000
 lock master
 total etag LastChangedAt
 authorization master ( instance )
@@ -13,9 +14,9 @@ etag master LocalLastChangedAt
 changedocuments master ( YRD_ORDER_CDH )
 {
 
-  changedocuments (create : key, update : data, delete : none);
+  changedocuments ( create : key, update : data, delete : none );
 
-  create ( authorization : global );
+  create ( authorization : global ) { default function GetDefaultsForCreate; }
   update;
   delete;
 
@@ -23,6 +24,7 @@ changedocuments master ( YRD_ORDER_CDH )
   draft action Activate optimized;
   draft action Resume;
   draft action Discard;
+  draft action Share;
   draft determine action Prepare
   {
     validation check_order_date;
@@ -43,20 +45,22 @@ changedocuments master ( YRD_ORDER_CDH )
   // Managed numbering for GUID generation
   field ( numbering : managed ) Uuid;
   // Dynamic Feature Control - Fields
-  //  field ( features : instance ) NetAmount, CurrencyCode;
+  field ( features : instance ) CustomerId;
   // Static feature control - Fields
-  field ( mandatory : create, readonly : update ) CustomerId;
+  //  field ( mandatory : create, readonly : update ) CustomerId;
   // Dynamic Feayure control - Operations
   association _Item { create ( features : instance ); with draft; }
 
-
+  association _Customer { with draft; link action LinkAction;
+                                      unlink action UnLinkAction;
+                                      inverse function InverseFunction; }
   // Validations
   validation check_order_date on save { field OrderDate; }
 
   // Determination
   determination fill_status on modify { field CustomerId; }
 
-  determination set_order_id on save { field CustomerId; }
+  determination set_order_id on save { create; }
 
   // Action
   action ( features : instance ) changeStatus parameter YRD_D_OrderStatusP result [1] $self;
@@ -109,9 +113,9 @@ authorization dependent by _Order
 etag dependent by _Order
 changedocuments dependent by _Order
 {
-  changedocuments (delete : data, create : data);
+  changedocuments ( delete : data, create : data );
 
-  update(features : instance);
+  update ( features : instance );
   delete;
 
   field ( readonly )

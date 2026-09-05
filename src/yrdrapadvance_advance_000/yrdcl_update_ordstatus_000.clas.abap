@@ -26,8 +26,8 @@ CLASS yrdcl_update_ordstatus_000 IMPLEMENTATION.
       UPDATE
       FIELDS ( Status OrderDate )
       WITH VALUE #( ( %tky       = CORRESPONDING #( ls_order )
-                      Status     = '01'
-                      OrderDate  = ls_order-order_date - 10  ) )
+                      Status     = '02'
+                      OrderDate  = ls_order-order_date + 10  ) )
       FAILED DATA(lt_update_failed)
       REPORTED DATA(lt_update_reported).
 

@@ -19,13 +19,16 @@ CLASS yrdcl_read_change_documents IMPLEMENTATION.
 
     " read Change document object YRD_ORDER_CD
     TRY.
+        DATA(lv_start_date) =  CONV d( cl_abap_context_info=>get_system_date(  ) - 7 ).
+        DATA(lv_end_date)   =  cl_abap_context_info=>get_system_date(  ).
+
         cl_chdo_read_tools=>changedocument_read(
           EXPORTING
             i_objectclass    = 'YRD_ORDER_CDH'
 *      it_objectid      =
-            i_date_of_change = cl_abap_context_info=>get_system_date(  )
+            i_date_of_change = CONV #( lv_start_date )
 *      i_time_of_change =
-*      i_date_until     =
+            i_date_until     = lv_end_date
 *      i_time_until     =
 *      it_username      =
 *      iv_read_archive  =
@@ -37,19 +40,19 @@ CLASS yrdcl_read_change_documents IMPLEMENTATION.
         ).
       CATCH cx_chdo_read_error.
         "handle exception
-                out->write( 'Read Error : Auth missing'
+        out->write( 'Read Error : Auth missing'
 *          RECEIVING
 *            output =
-        ).
+).
     ENDTRY.
 
-        out->write(
-          EXPORTING
-            data   = lt_result
-            name   = 'Change Documents'
+    out->write(
+      EXPORTING
+        data   = lt_result
+        name   = 'Change Documents'
 *          RECEIVING
 *            output =
-        ).
+    ).
 
   ENDMETHOD.
 ENDCLASS.

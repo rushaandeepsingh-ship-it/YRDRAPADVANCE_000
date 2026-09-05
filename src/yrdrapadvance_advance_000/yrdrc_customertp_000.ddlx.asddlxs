@@ -1,0 +1,112 @@
+@Metadata.layer: #CORE
+@UI: { headerInfo:          { typeName:         'Customer',
+                              typeNamePlural:   'Customers' },
+       presentationVariant: [{ visualizations: [{type: #AS_LINEITEM}] }]}
+
+annotate entity YRDRC_CustomerTP_000 with
+{
+  @UI.facet: [
+          {
+            id:              'Customer',
+            purpose:         #STANDARD,
+            type:            #COLLECTION,
+            label:           'Customer',
+            position:        10
+          },
+          {
+            id:              'General',
+            targetQualifier: 'General_FG',
+            parentId:        'Customer',
+            purpose:         #STANDARD,
+            type:            #FIELDGROUP_REFERENCE,
+            label:           'General',
+            position:        10
+          },
+          {
+            id:              'Admin',
+            targetQualifier: 'Admin_FG',
+            parentId:        'Customer',
+            purpose:         #STANDARD,
+            type:            #FIELDGROUP_REFERENCE,
+            label:           'Administrative Data',
+            position:        20
+          },
+
+          { id:            'Address',
+            type:          #LINEITEM_REFERENCE,
+            label:         'Address',
+            position:      20,
+            targetElement: '_Address'
+          },
+//          { id:            'Payment',
+//            type:          #LINEITEM_REFERENCE,
+//            label:         'Payment',
+//            position:      30,
+//            targetElement: '_Payment'
+//          },
+          { id:            'Order',
+            type:          #LINEITEM_REFERENCE,
+            label:         'Order',
+            position:      40,
+            targetElement: '_Order'
+          }
+        ]
+  @UI.hidden: true
+  Uuid;
+  @UI: { lineItem:          [{ position: 10, importance: #HIGH }],
+         selectionField:    [{ position: 10 }],
+         identification:    [{ position: 10 }],
+         fieldGroup:        [{ position: 10, qualifier: 'General_FG' }]}
+  @EndUserText.label: 'Customer ID'
+  CustomerId;
+
+  @UI: { lineItem:          [{ position: 20 }],
+         selectionField:    [{ position: 20 }],
+         identification:    [{ position: 20 }],
+         fieldGroup:        [{ position: 20, qualifier: 'General_FG' }]}
+  @EndUserText.label: 'Customer Name'
+  Name;
+
+  @UI: { lineItem:          [{ position: 30 }],
+         selectionField:    [{ position: 30 }],
+         identification:    [{ position: 30 }],
+         fieldGroup:        [{ position: 30, qualifier: 'General_FG' }]}
+  @EndUserText.label: 'Email ID'
+  Email;
+
+  @UI: { lineItem:          [{ position: 40 }],
+         selectionField:    [{ position: 40 }],
+         identification:    [{ position: 40 }],
+         fieldGroup:        [{ position: 40, qualifier: 'General_FG' }]}
+  @EndUserText.label: 'Mobile No.'
+  Mobileno;
+
+  @UI: { lineItem:        [{ position: 60 }],
+         selectionField:  [{ position: 60 }],
+         identification:  [{ position: 50 }],
+         fieldGroup:      [{ position: 60, qualifier: 'Admin_FG' }]}
+  @EndUserText.label:     'Created By'
+  LocalCreatedBy;
+
+  @UI: { lineItem:        [{ position: 70 }],
+         selectionField:  [{ position: 70 }],
+         identification:  [{ position: 60 }],
+         fieldGroup:      [{ position: 70, qualifier: 'Admin_FG' }]}
+  @EndUserText.label:     'Created At'
+  LocalCreatedAt;
+
+  @UI: { lineItem:        [{ position: 80 }],
+         selectionField:  [{ position: 80 }],
+         identification:  [{ position: 70 }],
+         fieldGroup:      [{ position: 80, qualifier: 'Admin_FG' }]}
+  @EndUserText.label:     'Last Changed By'
+  LocalLastChangedBy;
+
+  @UI: { lineItem:        [{ position: 90 }],
+       selectionField:  [{ position: 90 }],
+       identification:  [{ position: 80 }],
+       fieldGroup:      [{ position: 90, qualifier: 'Admin_FG' }]}
+  @EndUserText.label:     'Last Changed At'
+  LocalLastChangedAt;
+
+}

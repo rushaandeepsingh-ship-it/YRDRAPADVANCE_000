@@ -1,0 +1,120 @@
+managed;
+strict ( 2 );
+with collaborative draft;
+with cross associations;
+
+define behavior for YRDR_CustomerTP_000 alias Customer
+implementation in class yrdbp_r_customertp_000 unique
+persistent table yrd_customer_000
+draft table yrd_customer_d query YRDR_CustomerDraftTP_000
+lock master
+total etag LastChangedAt
+authorization master ( instance )
+
+etag master LocalLastChangedAt
+{
+  create ( authorization : global );
+  update;
+  delete;
+
+  draft action Activate optimized;
+  draft action Edit;
+  draft action Discard;
+  draft action Resume;
+  draft action Share;
+  draft determine action Prepare;
+
+  field ( numbering : managed ) Uuid;
+  field (mandatory : create) Name;
+  field ( readonly )
+  Uuid,
+  CustomerId,
+  LocalCreatedBy,
+  LocalCreatedAt,
+  LocalLastChangedBy,
+  LocalLastChangedAt,
+  LastChangedAt;
+
+  determination set_customer_id on modify { field name; }
+
+  side effects
+  {
+    field name affects field CustomerId;
+  }
+
+  association _Address { create; with draft; }
+//  association _Payment { create; with draft; }
+
+  association _Order using YRDR_OrderTP_000 \ _Customer { create; with draft; }
+
+  mapping for yrd_customer_000 corresponding
+    {
+      CustomerId         = customer_id;
+      LastChangedAt      = last_changed_at;
+      LocalCreatedAt     = local_created_at;
+      LocalCreatedBy     = local_created_by;
+      LocalLastChangedAt = local_last_changed_at;
+      LocalLastChangedBy = local_last_changed_by;
+    }
+}
+
+define behavior for YRDR_AddressTP_000 alias Address
+implementation in class yrdbp_r_addresstp_000 unique
+persistent table yrd_address_000
+draft table yrd_address_d
+lock dependent by _Customer
+authorization dependent by _Customer
+etag dependent by _Customer
+{
+  update;
+  delete;
+  field ( numbering : managed ) Uuid;
+  field ( readonly ) Uuid, CustomerUuid;
+  association _Customer { with draft; }
+
+  mapping for yrd_address_000 corresponding
+    {
+      AddressCode    = address_type;
+      CountryCode    = country_code;
+      CustomerUuid   = customer_uuid;
+      DefaultAddress = default_address;
+      PostalCode     = postal_code;
+    }
+}
+
+//define behavior for YRDR_PaymentTP_000 alias Payment_1
+//implementation in class yrdbp_r_paymenttp_000 unique
+//persistent table yrd_payment_000
+//draft table yrd_payment_d
+//lock dependent by _Customer
+//authorization dependent by _Customer
+//etag master LastChangedAt
+//{
+//  update;
+//  delete;
+//  field ( numbering : managed ) Uuid;
+//  field ( readonly )
+//  Uuid,
+//  CustomerUUID,
+//  LocalCreatedBy,
+//  LocalCreatedAt,
+//  LocalLastChangedBy,
+//  LocalLastChangedAt,
+//  LastChangedAt;
+//  association _Customer { with draft; }
+//
+//  mapping for yrd_payment_000 corresponding
+//    {
+//      AccountNo          = account_no;
+//      BankName           = bank_name;
+//      CustomerUUID       = customer_uuid;
+//      DefaultPayment     = default_payment;
+//      PaymentType        = payment_type;
+//      LastChangedAt      = last_changed_at;
+//      LocalCreatedAt     = local_created_at;
+//      LocalCreatedBy     = local_created_by;
+//      LocalLastChangedAt = local_last_changed_at;
+//      LocalLastChangedBy = local_last_changed_by;
+//    }
+//
+//}

@@ -1,0 +1,4 @@
+@EndUserText.label: 'Service Definition for Unmanaged Query'
+define service YRD_UI_ChangeDocOrderTP_000 {
+  expose YRDC_ChangeDocOrderTP_000 as ChangeDocumentOrder;
+}

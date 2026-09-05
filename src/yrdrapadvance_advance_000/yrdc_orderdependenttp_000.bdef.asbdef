@@ -1,0 +1,19 @@
+projection;
+strict ( 2 );
+use collaborative draft as dependent;
+
+
+define behavior for YRDC_OrderDependentTP_000 alias OrderDependent
+{
+  use create;
+  use update;
+  use delete;
+
+  use action changeStatus;
+  use action copy;
+  use action checkOrderDate;
+//  use function GetDefaultsForCreate;
+
+  use association _Customer { with draft; }
+
+}
